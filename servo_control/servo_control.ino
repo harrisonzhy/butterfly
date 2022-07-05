@@ -15,3 +15,5 @@ auto forward or should a button need to be depressed?
 integrate RF or ESP32 into this : joystick --> analog --> motor
 - need two arduino micros - one local controller; one flight board
 */
+
+
