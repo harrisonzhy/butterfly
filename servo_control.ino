@@ -12,5 +12,6 @@ use servo.write() method to set angles : 0-180, with 90 being 'middle' according
 auto forward or should a button need to be depressed?
     - (hardware?) issue: turns need to take precedence over forward motion
 
-someehow integrate RF or ESP32 into this
+integrate RF or ESP32 into this : joystick --> analog --> motor
+- need two arduino micros - one local controller; one flight board
 */
