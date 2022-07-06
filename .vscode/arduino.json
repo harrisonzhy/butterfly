@@ -1,4 +1,3 @@
 {
-    "board": "arduino:avr:micro",
-    "programmer": "arduino:arduinoisp"
+    "board": "arduino:avr:micro"
 }
