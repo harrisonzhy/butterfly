@@ -29,8 +29,6 @@ int RIGHT_SERVO = 3;
 int x_val = 0;
 int y_val = 0;
 
-float get_uint8 (float degrees);
-
 //////////////////////////////////
 
 void setup() {
@@ -47,8 +45,8 @@ void loop() {
 
     // 7/13/2022: need to figure out analog thresholds for servo direction changes
 
-    // stationary
-    while (x_val == 512 && y_val == 512 || x_val > 512) {
+    // stationary or forward
+    while ((is_within_thres(x_val, 0, 15) && is_within_thres(y_val, 0, 15)) || x_val > 512) {
         int x_uint8 = map(x_val, 0, 1023, 0, 255); // maps 0-1023 to 0-255
         int y_uint8 = map(y_val, 0, 1023, 0, 255);
 
@@ -56,23 +54,30 @@ void loop() {
         analogWrite(RIGHT_SERVO, get_uint8(30));
         analogWrite(LEFT_SERVO, get_uint8(-30));
         analogWrite(RIGHT_SERVO, get_uint8(-30));
+
     }
 
-    // 
 
 }
 
-float get_uint8 (float degrees) {
-// maps desired servo rotation to uint8 voltage control
+int get_uint8 (float degrees) {
+// maps desired servo rotation to float voltage control (0-255)
     if (degrees > 90.0) {degrees = 90.0;}
     else if (degrees < -90.0) {degrees = -90.0;}
 
-    float uint8_val = degrees/180.0 * 256.0 + 127.0;
+    int uint8_val = degrees/180.0 * 256.0 + 127.0;
     if (uint8_val > 255) {uint8_val = 255;}
     else if (uint8_val < 0) {uint8_val = 0;}
 
     return uint8_val;
+}
 
+bool is_within_thres (int uint8_val, int desired_deg, int deg_thres) {
+
+    int desired_uint8 = get_uint8(desired_deg);
+    int desired_uint8_thres = get_uint8(deg_thres);
+
+    return (uint8_val > desired_uint8 - desired_uint8_thres) && (uint8_val < desired_uint8 + desired_uint8_thres);
 }
 
 
