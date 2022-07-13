@@ -15,13 +15,64 @@ auto forward or should a button need to be depressed?
 integrate RF or ESP32 into this : joystick --> analog --> motor
 - need two arduino micros - one local controller; one flight board
 */
+#include <Arduino.h>
+#include <SPI.h>
+#include <Servo.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
+#define X A0
+#define Y A1
+int LEFT_SERVO = 2;
+int RIGHT_SERVO = 3;
+
+int x_val = 0;
+int y_val = 0;
+
+float get_uint8 (float degrees);
+
+//////////////////////////////////
 
 void setup() {
+    Serial.begin(9600);
+    pinMode(2, OUTPUT);
+    pinMode(3, OUTPUT);
 
 }
 
 void loop() {
     
+    x_val = analogRead(X);
+    y_val = analogRead(Y);
+
+    // 7/13/2022: need to figure out analog thresholds for servo direction changes
+
+    // stationary
+    while (x_val == 512 && y_val == 512 || x_val > 512) {
+        int x_uint8 = map(x_val, 0, 1023, 0, 255); // maps 0-1023 to 0-255
+        int y_uint8 = map(y_val, 0, 1023, 0, 255);
+
+        analogWrite(LEFT_SERVO, get_uint8(30));
+        analogWrite(RIGHT_SERVO, get_uint8(30));
+        analogWrite(LEFT_SERVO, get_uint8(-30));
+        analogWrite(RIGHT_SERVO, get_uint8(-30));
+    }
+
+    // 
+
+}
+
+float get_uint8 (float degrees) {
+// maps desired servo rotation to uint8 voltage control
+    if (degrees > 90.0) {degrees = 90.0;}
+    else if (degrees < -90.0) {degrees = -90.0;}
+
+    float uint8_val = degrees/180.0 * 256.0 + 127.0;
+    if (uint8_val > 255) {uint8_val = 255;}
+    else if (uint8_val < 0) {uint8_val = 0;}
+
+    return uint8_val;
+
 }
 
 
