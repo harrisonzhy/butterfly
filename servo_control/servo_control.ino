@@ -26,13 +26,23 @@ integrate RF or ESP32 into this : joystick --> analog --> motor
 int LEFT_SERVO = 2;
 int RIGHT_SERVO = 3;
 
+// joystick analog
 int x_val = 0;
 int y_val = 0;
 
-//////////////////////////////////
+// analog direction change thresholds
+const int LEFT_THRES_ANLG = 425;
+const int RIGHT_THRES_ANLG = 512 * 2 - LEFT_THRES_ANLG;
+const int DOWN_THRES_ANLG = 400;
+
+const int LEFT_THRES_DEG = (512 - LEFT_THRES_ANLG) / 512 * 180; // needs revision 7/13/2022
+const int RIGHT_THRES_DEG = (512 - RIGHT_THRES_ANLG) / 512 * 180;
+const int DOWN_THRES_DEG = DOWN_THRES_ANLG / 512 * 180;
+ 
+////////////////////////////////////////////////////////////////////
 
 void setup() {
-    Serial.begin(9600);
+
     pinMode(2, OUTPUT);
     pinMode(3, OUTPUT);
 
@@ -40,24 +50,51 @@ void setup() {
 
 void loop() {
     
-    x_val = analogRead(X);
-    y_val = analogRead(Y);
+    x_val = analogRead(X); // joystick X
+    y_val = analogRead(Y); // joystick Y
 
-    // 7/13/2022: need to figure out analog thresholds for servo direction changes
+    int x_uint8 = map(x_val, 0, 1023, 0, 255); // maps 0-1023 to 0-255
+    int y_uint8 = map(y_val, 0, 1023, 0, 255);
 
     // stationary or forward
-    while ((is_within_thres(x_val, 0, 15) && is_within_thres(y_val, 0, 15)) || x_val > 512) {
-        int x_uint8 = map(x_val, 0, 1023, 0, 255); // maps 0-1023 to 0-255
-        int y_uint8 = map(y_val, 0, 1023, 0, 255);
+    analogWrite(LEFT_SERVO, get_uint8(30));
+    analogWrite(RIGHT_SERVO, get_uint8(30));
+    analogWrite(LEFT_SERVO, get_uint8(-30));
+    analogWrite(RIGHT_SERVO, get_uint8(-30));
 
-        analogWrite(LEFT_SERVO, get_uint8(30));
-        analogWrite(RIGHT_SERVO, get_uint8(30));
-        analogWrite(LEFT_SERVO, get_uint8(-30));
-        analogWrite(RIGHT_SERVO, get_uint8(-30));
-
+    // turn left
+    while (x_val < LEFT_THRES_ANLG) {
+        for (int i = 0; i < 3; i++) {
+            analogWrite(LEFT_SERVO, get_uint8(20));
+            analogWrite(RIGHT_SERVO, get_uint8(40));   
+            analogWrite(LEFT_SERVO, get_uint8(-40));   
+            analogWrite(RIGHT_SERVO, get_uint8(-20));
+        }
     }
 
+    // turn right
+    while (x_val > RIGHT_THRES_ANLG) {
+        for (int i = 0; i < 3; i++) {
+            analogWrite(LEFT_SERVO, get_uint8(40));
+            analogWrite(RIGHT_SERVO, get_uint8(20));   
+            analogWrite(LEFT_SERVO, get_uint8(-20));   
+            analogWrite(RIGHT_SERVO, get_uint8(-40));
+        }
+    }   
 
+    // drop altitude
+    while (y_val < DOWN_THRES_ANLG) {
+        for (int i = 0; i < 2; i++) {
+            analogWrite(LEFT_SERVO, get_uint8(30));
+            delay(200);
+            analogWrite(RIGHT_SERVO, get_uint8(30));
+            delay(200);   
+            analogWrite(LEFT_SERVO, get_uint8(-30));
+            delay(200);
+            analogWrite(RIGHT_SERVO, get_uint8(-30));
+            delay(200);
+        }
+    }
 }
 
 int get_uint8 (float degrees) {
@@ -73,11 +110,12 @@ int get_uint8 (float degrees) {
 }
 
 bool is_within_thres (int uint8_val, int desired_deg, int deg_thres) {
-
+// sets joystick threshold
     int desired_uint8 = get_uint8(desired_deg);
     int desired_uint8_thres = get_uint8(deg_thres);
 
-    return (uint8_val > desired_uint8 - desired_uint8_thres) && (uint8_val < desired_uint8 + desired_uint8_thres);
+    return (uint8_val > desired_uint8 - desired_uint8_thres) 
+        && (uint8_val < desired_uint8 + desired_uint8_thres);
 }
 
 
