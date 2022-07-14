@@ -32,12 +32,12 @@ int y_val = 0;
 
 // analog direction change thresholds
 const int LEFT_THRES_ANLG = 425;
-const int RIGHT_THRES_ANLG = 512 * 2 - LEFT_THRES_ANLG;
+const int RIGHT_THRES_ANLG = 511 * 2 - LEFT_THRES_ANLG;
 const int DOWN_THRES_ANLG = 400;
 
-const int LEFT_THRES_DEG = (512 - LEFT_THRES_ANLG) / 512 * 180; // needs revision 7/13/2022
-const int RIGHT_THRES_DEG = (512 - RIGHT_THRES_ANLG) / 512 * 180;
-const int DOWN_THRES_DEG = DOWN_THRES_ANLG / 512 * 180;
+const int LEFT_THRES_DEG = (511 - LEFT_THRES_ANLG) / 511 * 180; // needs revision 7/13/2022
+const int RIGHT_THRES_DEG = (511 - RIGHT_THRES_ANLG) / 511 * 180;
+const int DOWN_THRES_DEG = DOWN_THRES_ANLG / 511 * 180;
  
 ////////////////////////////////////////////////////////////////////
 
@@ -86,13 +86,13 @@ void loop() {
     while (y_val < DOWN_THRES_ANLG) {
         for (int i = 0; i < 2; i++) {
             analogWrite(LEFT_SERVO, get_uint8(30));
-            delay(200);
+            delay(150);
             analogWrite(RIGHT_SERVO, get_uint8(30));
-            delay(200);   
+            delay(150);   
             analogWrite(LEFT_SERVO, get_uint8(-30));
-            delay(200);
+            delay(150);
             analogWrite(RIGHT_SERVO, get_uint8(-30));
-            delay(200);
+            delay(150);
         }
     }
 }
