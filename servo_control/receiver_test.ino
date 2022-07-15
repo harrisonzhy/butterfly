@@ -10,7 +10,7 @@
 #define Z 2
 
 RF24 Radio(5,6); // CE, CSN
-const byte address[6] = "31412"; // elain
+const byte address[6] = "31412";
 
 int xy_val[2];
 int x_val = 0;
@@ -38,8 +38,8 @@ void loop() {
         x_val = xy_val[1];
     }
 
-    x_val = analogRead(X);
-    y_val = analogRead(Y);
+    //x_val = analogRead(X);
+    //y_val = analogRead(Y);
 
     
     Serial.println(x_val);

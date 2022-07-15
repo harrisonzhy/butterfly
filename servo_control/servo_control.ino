@@ -15,21 +15,22 @@ integrate RF or ESP32 into this : joystick --> analog --> motor
 #include <nRF24L01.h>
 #include <RF24.h>
 
+// motor setup
 #define X A0            // RF24
 #define Y A1            // RF24
-#define Z 2;            // RF24
 int LEFT_SERVO = 3;
 int RIGHT_SERVO = 4;
 
 // 2.4g radio
 RF24 Radio(5,6); // CE, CSN
 const byte address[6] = "31412";
+unsigned long current_time = 0;
+unsigned long prev_time = 0;
 
 // joystick analog
 int xy_val[2];
 int x_val = 0;
 int y_val = 0;
-bool z_val = false; // 7/15/2022 figure out how to transmit/receive this
 char data_in[32] = "";
 
 
@@ -59,6 +60,8 @@ void setup() {
 
 void loop() {
     
+    current_time = millis();
+
     if (Radio.available()) {
         Radio.read(&data_in, sizeof(data_in));
         Radio.read(&xy_val, sizeof(&xy_val));
@@ -67,10 +70,8 @@ void loop() {
         x_val = xy_val[1];
     }
 
-    x_val = analogRead(X); // joystick X
-    y_val = analogRead(Y); // joystick Y
-    z_val = digitalRead(2); // boolean Z
-
+    //x_val = analogRead(X); // joystick X
+    //y_val = analogRead(Y); // joystick Y
 
 
     int x_uint8 = map(x_val, 0, 1023, 0, 255); // maps 0-1023 to 0-255
@@ -103,14 +104,18 @@ void loop() {
     }   
 
     // drop altitude
-    while (z_val == true) { // button is pressed
+    while (y_val < DOWN_THRES_ANLG) {
         for (int i = 0; i < 3; i++) {
-            analogWrite(LEFT_SERVO, get_uint8(30));
-            analogWrite(RIGHT_SERVO, get_uint8(30));
-            delay(200);   
-            analogWrite(LEFT_SERVO, get_uint8(-30));
-            analogWrite(RIGHT_SERVO, get_uint8(-30));
-            delay(200);
+            if (current_time - prev_time >= 200) { // wait 200 ms
+                analogWrite(LEFT_SERVO, get_uint8(30));
+                analogWrite(RIGHT_SERVO, get_uint8(30));
+                prev_time = current_time;
+            }
+            if (current_time - prev_time >= 200) { // wait 200 ms
+                analogWrite(LEFT_SERVO, get_uint8(-30));
+                analogWrite(RIGHT_SERVO, get_uint8(-30));
+                prev_time = current_time;
+            }
         }
     }
 }
@@ -134,6 +139,11 @@ bool is_within_thres (int uint8_val, int desired_deg, int deg_thres) {
 
     return (uint8_val > desired_uint8 - desired_uint8_thres) 
         && (uint8_val < desired_uint8 + desired_uint8_thres);
+}
+
+void wait(int time) {
+    time = abs(time);
+
 }
 
 
