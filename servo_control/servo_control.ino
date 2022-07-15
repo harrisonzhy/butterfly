@@ -15,16 +15,23 @@ integrate RF or ESP32 into this : joystick --> analog --> motor
 #include <nRF24L01.h>
 #include <RF24.h>
 
-#define X A0
-#define Y A1
-#define Z A2;
-int LEFT_SERVO = 2;
-int RIGHT_SERVO = 3;
+#define X A0            // RF24
+#define Y A1            // RF24
+#define Z 2;            // RF24
+int LEFT_SERVO = 3;
+int RIGHT_SERVO = 4;
+
+// 2.4g radio
+RF24 Radio(5,6); // CE, CSN
+const byte address[6] = "31412";
 
 // joystick analog
+int xy_val[2];
 int x_val = 0;
 int y_val = 0;
-bool z_val = false;
+bool z_val = false; // 7/15/2022 figure out how to transmit/receive this
+char data_in[32] = "";
+
 
 // analog direction change thresholds
 const int LEFT_THRES_ANLG = 400;
@@ -39,15 +46,32 @@ const int DOWN_THRES_DEG = DOWN_THRES_ANLG / 511 * 180;
 
 void setup() {
 
-    pinMode(2, OUTPUT);
-    pinMode(3, OUTPUT);
+    Serial.begin(9600); 
+    pinMode(3, OUTPUT); // left servo
+    pinMode(4, OUTPUT); // right servo
+
+    Radio.begin();
+    Radio.openReadingPipe(0,address);
+    Radio.setPALevel(RF24_PA_MAX); // max distance
+    Radio.startListening();
 
 }
 
 void loop() {
     
+    if (Radio.available()) {
+        Radio.read(&data_in, sizeof(data_in));
+        Radio.read(&xy_val, sizeof(&xy_val));
+
+        y_val  = xy_val[0];
+        x_val = xy_val[1];
+    }
+
     x_val = analogRead(X); // joystick X
     y_val = analogRead(Y); // joystick Y
+    z_val = digitalRead(2); // boolean Z
+
+
 
     int x_uint8 = map(x_val, 0, 1023, 0, 255); // maps 0-1023 to 0-255
     int y_uint8 = map(y_val, 0, 1023, 0, 255);
@@ -79,7 +103,7 @@ void loop() {
     }   
 
     // drop altitude
-    while (z_val == true) {
+    while (z_val == true) { // button is pressed
         for (int i = 0; i < 3; i++) {
             analogWrite(LEFT_SERVO, get_uint8(30));
             analogWrite(RIGHT_SERVO, get_uint8(30));
