@@ -1,7 +1,6 @@
 {
-    "board": "arduino:avr:mega",
-    "configuration": "cpu=atmega2560",
-    "port": "COM3",
+    "board": "arduino:avr:micro",
+    "port": "COM4",
     "programmer": "arduino:arduinoisp",
     "sketch": "servo_control\\servo_control.ino"
 }

@@ -16,7 +16,7 @@
             "intelliSenseMode": "gcc-x64",
             "includePath": [
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino",
-                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\variants\\mega",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\variants\\micro",
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\SPI\\src",
                 "C:\\Program Files (x86)\\Arduino\\libraries\\Servo\\src",
                 "C:\\Program Files (x86)\\Arduino\\libraries\\RF24-1.4.3",
@@ -32,8 +32,12 @@
             "defines": [
                 "F_CPU=16000000L",
                 "ARDUINO=10819",
-                "ARDUINO_AVR_MEGA2560",
+                "ARDUINO_AVR_MICRO",
                 "ARDUINO_ARCH_AVR",
+                "USB_VID=0x2341",
+                "USB_PID=0x8037",
+                "USB_MANUFACTURER=\"Unknown\"",
+                "USB_PRODUCT=\"Arduino Micro\"",
                 "__DBL_MIN_EXP__=(-125)",
                 "__HQ_FBIT__=15",
                 "__cpp_attributes=200809",

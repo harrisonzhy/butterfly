@@ -1,20 +1,14 @@
 // ctrl+shift+p to select board
-
 /*
-1) make joystick x and y objects
-2) ues analogRead(obj) method to get values
-left and down are 0; right and up are 1023; home position is 511
-
-set analog thresholds for U/D/R/L directions
-use servo.write() method to set angles : 0-180, with 90 being 'middle' according to analog values/thresholds
-    - may execute turns by offsetting the 'middle' angle in a while loop (while analog </> val_thres) so that one side of robot lifts up
-    
 auto forward or should a button need to be depressed?
     - (hardware?) issue: turns need to take precedence over forward motion
 
 integrate RF or ESP32 into this : joystick --> analog --> motor
 - need two arduino micros - one local controller; one flight board
 */
+
+/* CHRYSALIS RECEIVER PROGRAM */
+
 #include <Arduino.h>
 #include <SPI.h>
 #include <Servo.h>
@@ -23,15 +17,17 @@ integrate RF or ESP32 into this : joystick --> analog --> motor
 
 #define X A0
 #define Y A1
+#define Z A2;
 int LEFT_SERVO = 2;
 int RIGHT_SERVO = 3;
 
 // joystick analog
 int x_val = 0;
 int y_val = 0;
+bool z_val = false;
 
 // analog direction change thresholds
-const int LEFT_THRES_ANLG = 425;
+const int LEFT_THRES_ANLG = 400;
 const int RIGHT_THRES_ANLG = 511 * 2 - LEFT_THRES_ANLG;
 const int DOWN_THRES_ANLG = 400;
 
@@ -83,16 +79,14 @@ void loop() {
     }   
 
     // drop altitude
-    while (y_val < DOWN_THRES_ANLG) {
-        for (int i = 0; i < 2; i++) {
+    while (z_val == true) {
+        for (int i = 0; i < 3; i++) {
             analogWrite(LEFT_SERVO, get_uint8(30));
-            delay(150);
             analogWrite(RIGHT_SERVO, get_uint8(30));
-            delay(150);   
+            delay(200);   
             analogWrite(LEFT_SERVO, get_uint8(-30));
-            delay(150);
             analogWrite(RIGHT_SERVO, get_uint8(-30));
-            delay(150);
+            delay(200);
         }
     }
 }
