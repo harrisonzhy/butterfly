@@ -10,8 +10,8 @@
 #define X A0            // RF24
 #define Y A1            // RF24
 #define Z 2             // RF24
-int LEFT_SERVO = 3;
-int RIGHT_SERVO = 4;
+Servo LEFT_SERVO;
+Servo RIGHT_SERVO;
 
 // 2.4g radio
 RF24 Radio(5,6); // CE, CSN
@@ -38,8 +38,8 @@ const int UP_THRES_ANLG = 511 * 2 - DOWN_THRES_ANLG;
 void setup() {
 
     Serial.begin(9600);
-    pinMode(3, OUTPUT); // left servo
-    pinMode(4, OUTPUT); // right servo
+    LEFT_SERVO.attach(3);
+    RIGHT_SERVO.attach(4);
 
     Radio.begin();
     Radio.openReadingPipe(0,address);
@@ -71,28 +71,28 @@ void loop() {
     int y_uint8 = map(y_val, 0, 1023, 0, 255);
 
     // stationary or forward
-    analogWrite(LEFT_SERVO, get_uint8(30));
-    analogWrite(RIGHT_SERVO, get_uint8(30));
-    analogWrite(LEFT_SERVO, get_uint8(-30));
-    analogWrite(RIGHT_SERVO, get_uint8(-30));
+    LEFT_SERVO.write(get_angle(30));
+    RIGHT_SERVO.write(get_angle(30));
+    LEFT_SERVO.write(get_angle(-30));
+    RIGHT_SERVO.write(get_angle(-30));
 
     // turn left
     while (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {
         for (int i = 0; i < 3; i++) {
-            analogWrite(LEFT_SERVO, get_uint8(20));
-            analogWrite(RIGHT_SERVO, get_uint8(40));   
-            analogWrite(LEFT_SERVO, get_uint8(-40));   
-            analogWrite(RIGHT_SERVO, get_uint8(-20));
+            LEFT_SERVO.write(get_angle(20));
+            RIGHT_SERVO.write(get_angle(40));
+            LEFT_SERVO.write(get_angle(-40));
+            RIGHT_SERVO.write(get_angle(-20));
         }
     }
 
     // turn right
     while (x_val > RIGHT_THRES_ANLG && y_val > UP_THRES_ANLG) {
         for (int i = 0; i < 3; i++) {
-            analogWrite(LEFT_SERVO, get_uint8(40));
-            analogWrite(RIGHT_SERVO, get_uint8(20));   
-            analogWrite(LEFT_SERVO, get_uint8(-20));   
-            analogWrite(RIGHT_SERVO, get_uint8(-40));
+            LEFT_SERVO.write(get_angle(40));
+            RIGHT_SERVO.write(get_angle(20));
+            LEFT_SERVO.write(get_angle(-20));
+            RIGHT_SERVO.write(get_angle(-40));
         }
     }   
 
@@ -100,13 +100,13 @@ void loop() {
     while (z_val == 1) {
         for (int i = 0; i < 3; i++) {
             if (current_time - prev_time >= delay_time) {
-                analogWrite(LEFT_SERVO, get_uint8(30));
-                analogWrite(RIGHT_SERVO, get_uint8(30));
+                LEFT_SERVO.write(get_angle(30));
+                RIGHT_SERVO.write(get_angle(30));
                 prev_time = current_time;
             }
             if (current_time - prev_time >= delay_time) {
-                analogWrite(LEFT_SERVO, get_uint8(-30));
-                analogWrite(RIGHT_SERVO, get_uint8(-30));
+                LEFT_SERVO.write(get_angle(-30));
+                RIGHT_SERVO.write(get_angle(-30));
                 prev_time = current_time;
             }
         }
@@ -133,12 +133,10 @@ int get_thres_deg (int thres_anlg) {
     return (int)((511 - thres_anlg) / 511 * 180);
 }
 
-bool is_within_thres (int uint8_val, int desired_deg, int deg_thres) {
-// sets joystick threshold
-    int desired_uint8 = get_uint8(desired_deg);
-    int desired_uint8_thres = get_uint8(deg_thres);
-
-    return (uint8_val > desired_uint8 - desired_uint8_thres) 
-        && (uint8_val < desired_uint8 + desired_uint8_thres);
+int get_angle (int displacement) {
+    if (displacement < -90) {displacement = -90;}
+    else if (displacement > 90) {displacement = 90;}
+    
+    return 90 + displacement;
 }
 
