@@ -15,26 +15,28 @@ integrate RF or ESP32 into this : joystick --> analog --> motor
 #include <nRF24L01.h>
 #include <RF24.h>
 
-// motor setup
 #define X A0            // RF24
 #define Y A1            // RF24
+#define Z 2             // RF24
 int LEFT_SERVO = 3;
 int RIGHT_SERVO = 4;
 
 // 2.4g radio
 RF24 Radio(5,6); // CE, CSN
 const byte address[6] = "31412";
+
+// timekeeping
 unsigned long current_time = 0;
 unsigned long prev_time = 0;
 
 // joystick analog
-int xy_val[2];
+int xyz_val[3] = {0,0,0};
 int x_val = 0;
 int y_val = 0;
+int z_val = 0;
 char data_in[32] = "";
 
-
-// analog direction change thresholds
+// servo direction thresholds
 const int LEFT_THRES_ANLG = 400;
 const int RIGHT_THRES_ANLG = 511 * 2 - LEFT_THRES_ANLG;
 const int DOWN_THRES_ANLG = 400;
@@ -61,18 +63,19 @@ void setup() {
 void loop() {
     
     current_time = millis();
+    const int delay_time = 200;
 
     if (Radio.available()) {
         Radio.read(&data_in, sizeof(data_in));
-        Radio.read(&xy_val, sizeof(&xy_val));
+        Radio.read(&xyz_val, sizeof(&xyz_val));
 
-        y_val  = xy_val[0];
-        x_val = xy_val[1];
+        x_val = (int)xyz_val[0];
+        y_val = (int)xyz_val[1];
+        z_val = (int)xyz_val[2];
     }
 
     //x_val = analogRead(X); // joystick X
     //y_val = analogRead(Y); // joystick Y
-
 
     int x_uint8 = map(x_val, 0, 1023, 0, 255); // maps 0-1023 to 0-255
     int y_uint8 = map(y_val, 0, 1023, 0, 255);
@@ -106,12 +109,12 @@ void loop() {
     // drop altitude
     while (y_val < DOWN_THRES_ANLG) {
         for (int i = 0; i < 3; i++) {
-            if (current_time - prev_time >= 200) { // wait 200 ms
+            if (current_time - prev_time >= delay_time) {
                 analogWrite(LEFT_SERVO, get_uint8(30));
                 analogWrite(RIGHT_SERVO, get_uint8(30));
                 prev_time = current_time;
             }
-            if (current_time - prev_time >= 200) { // wait 200 ms
+            if (current_time - prev_time >= delay_time) {
                 analogWrite(LEFT_SERVO, get_uint8(-30));
                 analogWrite(RIGHT_SERVO, get_uint8(-30));
                 prev_time = current_time;
@@ -126,6 +129,7 @@ int get_uint8 (float degrees) {
     else if (degrees < -90.0) {degrees = -90.0;}
 
     int uint8_val = degrees/180.0 * 256.0 + 127.0;
+
     if (uint8_val > 255) {uint8_val = 255;}
     else if (uint8_val < 0) {uint8_val = 0;}
 
@@ -139,11 +143,6 @@ bool is_within_thres (int uint8_val, int desired_deg, int deg_thres) {
 
     return (uint8_val > desired_uint8 - desired_uint8_thres) 
         && (uint8_val < desired_uint8 + desired_uint8_thres);
-}
-
-void wait(int time) {
-    time = abs(time);
-
 }
 
 
