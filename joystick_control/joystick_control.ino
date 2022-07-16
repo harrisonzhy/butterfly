@@ -1,4 +1,3 @@
-
 #include <Arduino.h>
 #include <SPI.h>
 #include <Servo.h>
@@ -12,7 +11,7 @@
 RF24 Radio(5,6); // CE, CSN
 const byte address[6] = "31412";
 
-int xy_val[3] = {0,0,0};
+int xyz_val[3] = {0,0,0};
 int x_val = 0;
 int y_val = 0;
 int z_val = 0;
@@ -35,6 +34,6 @@ void loop() {
 
     const char msg_in[] = "";
     Radio.write(&msg_in, sizeof(msg_in));
-    Radio.write(&xy_val, sizeof(xy_val));
+    Radio.write(&xyz_val, sizeof(xyz_val));
 
 }
