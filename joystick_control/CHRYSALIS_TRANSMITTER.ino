@@ -1,5 +1,5 @@
 
-/* TRANSMITTER TEST PROGRAM */
+/* CHRYSALIS TRANSMITTER PROGRAM */
 
 #include <Arduino.h>
 #include <SPI.h>
@@ -31,13 +31,16 @@ void setup() {
 
 void loop() {
 
-    // read analog joystick
     x_val = (int)analogRead(X);
     y_val = (int)analogRead(Y);
     z_val = (int)digitalRead(2);
 
-    const char msg_in[] = "";
-    Radio.write(&msg_in, sizeof(msg_in));
+    xyz_val[0] = x_val;
+    xyz_val[1] = y_val;
+    xyz_val[2] = z_val;
+
+    const char msg_out[] = "";
+    Radio.write(&msg_out, sizeof(msg_out));
     Radio.write(&xyz_val, sizeof(xyz_val));
 
 }
