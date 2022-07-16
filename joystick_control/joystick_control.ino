@@ -1,3 +1,6 @@
+
+/* CHRYSALIS TRANSMITTER PROGRAM */
+
 #include <Arduino.h>
 #include <SPI.h>
 #include <Servo.h>
@@ -21,7 +24,7 @@ void setup() {
 
   Radio.begin();
   Radio.openWritingPipe(address);
-  Radio.setPALevel(RF24_PA_MAX); // max distance
+  Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
   Radio.stopListening(); // sets as transmitter
 
 }
@@ -32,8 +35,12 @@ void loop() {
     y_val = (int)analogRead(Y);
     z_val = (int)digitalRead(2);
 
-    const char msg_in[] = "";
-    Radio.write(&msg_in, sizeof(msg_in));
+    xyz_val[0] = x_val;
+    xyz_val[1] = y_val;
+    xyz_val[2] = z_val;
+
+    const char msg_out[] = "";
+    Radio.write(&msg_out, sizeof(msg_out));
     Radio.write(&xyz_val, sizeof(xyz_val));
 
 }

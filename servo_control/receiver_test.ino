@@ -22,8 +22,8 @@ void setup() {
 
   Radio.begin();
   Radio.openReadingPipe(0,address);
-  Radio.setPALevel(RF24_PA_MAX); // max distance
-  Radio.startListening();
+  Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
+  Radio.startListening(); // sets as receiver
   
 }
 
