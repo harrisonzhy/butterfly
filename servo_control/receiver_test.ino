@@ -9,7 +9,7 @@
 
 #define X A0
 #define Y A1
-#define Z 2
+#define Z 10
 
 RF24 Radio(5,6); // CE, CSN
 const byte address[6] = "31412";
@@ -20,12 +20,13 @@ int y_val = 0;
 int z_val = 0;
 
 void setup() {
-  Serial.begin(9600);
 
-  Radio.begin();
-  Radio.openReadingPipe(0,address);
-  Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
-  Radio.startListening(); // sets as receiver
+    Serial.begin(9600);
+
+    Radio.begin();
+    Radio.openReadingPipe(0,address);
+    Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
+    Radio.startListening(); // sets as receiver
   
 }
 

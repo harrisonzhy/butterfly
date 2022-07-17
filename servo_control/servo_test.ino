@@ -9,7 +9,7 @@
 
 #define X A0            // RF24
 #define Y A1            // RF24
-#define Z 2             // RF24
+#define Z 10            // RF24
 Servo LEFT_SERVO;
 Servo RIGHT_SERVO;
 

@@ -9,7 +9,7 @@
 
 #define X A0            // RF24
 #define Y A1            // RF24
-#define Z 2             // RF24
+#define Z 10            // RF24
 Servo LEFT_SERVO;
 Servo RIGHT_SERVO;
 
@@ -40,6 +40,8 @@ void setup() {
     Serial.begin(9600);
     LEFT_SERVO.attach(3);
     RIGHT_SERVO.attach(4);
+    LEFT_SERVO.write(get_angle(0));
+    RIGHT_SERVO.write(get_angle(0));
 
     Radio.begin();
     Radio.openReadingPipe(0,address);

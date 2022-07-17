@@ -15,36 +15,24 @@ void setup() {
 
     Serial.begin(9600);
     LEFT_SERVO.attach(3);
-    LEFT_SERVO.write(90);
+    LEFT_SERVO.write(get_angle(0));
 }
 
 void loop() {
-    LEFT_SERVO.write(45);
-    delay(500);
-    LEFT_SERVO.write(135);
-    delay(500);
+    //analogWrite(LEFT_SERVO, 255);
+    LEFT_SERVO.write(get_angle(30));
+    delay(110);
+    
+    //analogWrite(LEFT_SERVO, 255);
+    LEFT_SERVO.write(get_angle(-30));
+    delay(110);
     Serial.println("-----");
     
 }
 
-
-
-
-
-
-
-
-
-
-int get_uint8 (float degrees) {
-// maps desired servo rotation to float voltage control (0-255)
-    //if (degrees > 90.0) {degrees = 90.0;}
-    //else if (degrees < -90.0) {degrees = -90.0;}
-
-    int uint8_val = degrees/180.0 * 256.0 + 127.0;
-
-    if (uint8_val > 255) {uint8_val = 255;}
-    else if (uint8_val < 0) {uint8_val = 0;}
-
-    return uint8_val;
+int get_angle (int displacement) {
+    if (displacement < -90) {displacement = -90;}
+    else if (displacement > 90) {displacement = 90;}
+    
+    return 90 + displacement;
 }
