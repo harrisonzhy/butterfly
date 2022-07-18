@@ -6,7 +6,7 @@
 #include <Servo.h>
 #include <nRF24L01.h>
 #include <RF24.h>
-
+  
 #define X A0            // RF24
 #define Y A1            // RF24
 #define Z 10            // RF24

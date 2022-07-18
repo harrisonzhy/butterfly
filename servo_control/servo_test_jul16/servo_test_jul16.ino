@@ -10,23 +10,27 @@
 #define Y A1
 #define Z 2
 Servo LEFT_SERVO;
+Servo RIGHT_SERVO;
 
 void setup() {
 
     Serial.begin(9600);
     LEFT_SERVO.attach(3);
+    RIGHT_SERVO.attach(10);
     LEFT_SERVO.write(get_angle(0));
+    RIGHT_SERVO.write(get_angle(0));
 }
 
 void loop() {
     //analogWrite(LEFT_SERVO, 255);
     LEFT_SERVO.write(get_angle(30));
-    delay(110);
+    RIGHT_SERVO.write(get_angle(30));
+    delay(100);
     
     //analogWrite(LEFT_SERVO, 255);
     LEFT_SERVO.write(get_angle(-30));
-    delay(110);
-    Serial.println("-----");
+    RIGHT_SERVO.write(get_angle(-30));
+    delay(100);
     
 }
 
