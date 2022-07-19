@@ -21,18 +21,21 @@ const byte address[6] = "31412";
 unsigned long current_time = 0;
 unsigned long prev_time = 0;
 
-// joystick analog
+// analog readings
 int xyz_val[3] = {0,0,0};
 int x_val = 0;
 int y_val = 0;
 int z_val = 0;
+bool z_vals[] = {};
+bool switched = false;
 
-// servo direction thresholds
+// analog thresholds
 const int LEFT_THRES_ANLG = 400;
 const int DOWN_THRES_ANLG = 400;
 const int RIGHT_THRES_ANLG = 511 * 2 - LEFT_THRES_ANLG;
 const int UP_THRES_ANLG = 511 * 2 - DOWN_THRES_ANLG;
- 
+const int DBL_PRESS_TIME = 500;
+
 ////////////////////////////////////////////////////////////////////
 
 void setup() {
@@ -64,6 +67,8 @@ void loop() {
         x_val = (int)xyz_val[0];
         y_val = (int)xyz_val[1];
         z_val = (int)xyz_val[2];
+
+        z_vals.append((bool)z_val);
     }
 
     //x_val = analogRead(X); // joystick X
@@ -99,7 +104,7 @@ void loop() {
     }   
 
     // drop altitude
-    while (z_val == 1) {
+    while (y_val < DOWN_THRES_ANLG) {
         for (int i = 0; i < 3; i++) {
             if (current_time - prev_time >= delay_time) {
                 LEFT_SERVO.write(get_angle(30));
@@ -142,3 +147,6 @@ int get_angle (int displacement) {
     return 90 + displacement;
 }
 
+bool is_double_pressed (int z_val, int time_thres) {
+     
+}
