@@ -57,11 +57,10 @@ void setup() {
 
 }
 
-byte count = 0;
+byte num_vals = 0;
 
 void loop() { // 7/19/22 find a way to implement timer for button delay timer
     
-    current_time = millis();
     const int delay_time = 200;
 
     if (Radio.available()) {
@@ -73,10 +72,12 @@ void loop() { // 7/19/22 find a way to implement timer for button delay timer
         y_val = (int)xyz_val[1];
         z_val = (int)xyz_val[2];
 
-        if (count < sizeof(z_vals)) {
-            z_vals[count] = xyz_val[2];
-            if(is_double_pressed(z_val, current_time, 500)) is_on = !is_on;
-            ++count;
+        if (num_vals < sizeof(z_vals)) {
+            z_vals[num_vals] = xyz_val[2];
+            if(is_double_pressed(z_val, millis(), 500)) {
+                is_on = !is_on;
+            }
+            ++num_vals;
         }
         else {
             for (byte c = 0; c < sizeof(z_vals); ++c) {
