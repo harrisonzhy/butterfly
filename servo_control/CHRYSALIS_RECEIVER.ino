@@ -26,8 +26,8 @@ int xyz_val[3] = {0,0,0};
 int x_val = 0;
 int y_val = 0;
 int z_val = 0;
-bool z_vals[] = {};
-bool switched = false;
+bool z_vals[10];
+bool is_on = false;
 
 // analog thresholds
 const int LEFT_THRES_ANLG = 400;
@@ -51,13 +51,18 @@ void setup() {
     Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
     Radio.startListening();
 
+    for (byte c = 0; c < sizeof z_vals; ++c) {
+        z_vals[c] = false;
+    }
+
 }
 
-void loop() {
+byte count = 0;
+
+void loop() { // 7/19/22 find a way to implement timer for button delay timer
     
     current_time = millis();
     const int delay_time = 200;
-
 
     if (Radio.available()) {
         char msg_in[32] = "";
@@ -68,7 +73,16 @@ void loop() {
         y_val = (int)xyz_val[1];
         z_val = (int)xyz_val[2];
 
-        z_vals.append((bool)z_val);
+        if (count < sizeof(z_vals)) {
+            z_vals[count] = xyz_val[2];
+            if(is_double_pressed(z_val, current_time, 500)) is_on = !is_on;
+            ++count;
+        }
+        else {
+            for (byte c = 0; c < sizeof(z_vals); ++c) {
+                z_vals[c] = false;
+            }
+        }
     }
 
     //x_val = analogRead(X); // joystick X
@@ -147,6 +161,17 @@ int get_angle (int displacement) {
     return 90 + displacement;
 }
 
-bool is_double_pressed (int z_val, int time_thres) {
-     
+bool is_double_pressed (int z_val, int prev_time, int time_thres) {
+    byte instances = 0;
+    if (millis() - prev_time <= time_thres) {
+        for (byte c = 0; c < sizeof(z_vals); ++c) {
+            if (z_vals[c] == true)  {
+                ++instances;
+            }
+        }
+        if (instances > 1) { // double click
+            return true;
+        }
+    }
+    return false;
 }
