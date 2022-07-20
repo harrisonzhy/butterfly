@@ -13,28 +13,31 @@
 Servo LEFT_SERVO;
 Servo RIGHT_SERVO;
 
-// 2.4g radio
+// 2.4 ghz radio
 RF24 Radio(5,6); // CE, CSN
 const byte address[6] = "31412";
 
 // timekeeping
-unsigned long current_time = 0;
-unsigned long prev_time = 0;
+unsigned long time_curr = 0;
+unsigned long time_prev = 0;
+unsigned long time_delay = 200;
 
 // analog readings
 int xyz_val[3] = {0,0,0};
 int x_val = 0;
 int y_val = 0;
 int z_val = 0;
-bool z_vals[10];
+unsigned long z_vals[2][2] = {{0,0}, 
+                              {0,0}};
 bool is_on = false;
 
 // analog thresholds
 const int LEFT_THRES_ANLG = 400;
 const int DOWN_THRES_ANLG = 400;
-const int RIGHT_THRES_ANLG = 511 * 2 - LEFT_THRES_ANLG;
-const int UP_THRES_ANLG = 511 * 2 - DOWN_THRES_ANLG;
-const int DBL_PRESS_TIME = 500;
+const int RIGHT_THRES_ANLG = 1022 - LEFT_THRES_ANLG;
+const int UP_THRES_ANLG = 1022 - DOWN_THRES_ANLG;
+const int FLAP_DELAY = 200;
+const int SWITCH_DELAY = 500;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -51,40 +54,34 @@ void setup() {
     Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
     Radio.startListening();
 
-    for (byte c = 0; c < sizeof z_vals; ++c) {
-        z_vals[c] = false;
-    }
-
 }
-
-byte num_vals = 0;
 
 void loop() { // 7/19/22 find a way to implement timer for button delay timer
     
-    const int delay_time = 200;
-
     if (Radio.available()) {
-        char msg_in[32] = "";
-        Radio.read(&msg_in, sizeof(msg_in));
-        Radio.read(&xyz_val, sizeof(&xyz_val));
+            char msg_in[32] = "";
+            Radio.read(&msg_in, sizeof(msg_in));
+            Radio.read(&xyz_val, sizeof(&xyz_val));
 
-        x_val = (int)xyz_val[0];
-        y_val = (int)xyz_val[1];
-        z_val = (int)xyz_val[2];
+            x_val = (int)xyz_val[0];
+            y_val = (int)xyz_val[1];
+            z_val = (int)xyz_val[2];
 
-        if (num_vals < sizeof(z_vals)) {
-            z_vals[num_vals] = xyz_val[2];
-            if(is_double_pressed(z_val, millis(), 500)) {
+            if (z_val == 1) {
+                for (byte c = 0; c <= 1; ++c) {
+                    if (z_vals[0][c] != 0) {
+                        z_vals[0][c] = z_val;
+                    if (z_vals[1][c] != 0) {
+                        z_vals[1][c] = millis();    
+                    }
+                }
+            }
+            if (is_dbl_pressed(SWITCH_DELAY)) {
                 is_on = !is_on;
             }
-            ++num_vals;
         }
-        else {
-            for (byte c = 0; c < sizeof(z_vals); ++c) {
-                z_vals[c] = false;
-            }
-        }
-    }
+    }   
+        
 
     //x_val = analogRead(X); // joystick X
     //y_val = analogRead(Y); // joystick Y
@@ -121,15 +118,15 @@ void loop() { // 7/19/22 find a way to implement timer for button delay timer
     // drop altitude
     while (y_val < DOWN_THRES_ANLG) {
         for (int i = 0; i < 3; i++) {
-            if (current_time - prev_time >= delay_time) {
+            if (time_curr - time_prev >= FLAP_DELAY) {
                 LEFT_SERVO.write(get_angle(30));
                 RIGHT_SERVO.write(get_angle(30));
-                prev_time = current_time;
+                time_prev = time_curr;
             }
-            if (current_time - prev_time >= delay_time) {
+            if (time_curr - time_prev >= FLAP_DELAY) {
                 LEFT_SERVO.write(get_angle(-30));
                 RIGHT_SERVO.write(get_angle(-30));
-                prev_time = current_time;
+                time_prev = time_curr;
             }
         }
     }
@@ -162,17 +159,16 @@ int get_angle (int displacement) {
     return 90 + displacement;
 }
 
-bool is_double_pressed (int z_val, int prev_time, int time_thres) {
-    byte instances = 0;
-    if (millis() - prev_time <= time_thres) {
-        for (byte c = 0; c < sizeof(z_vals); ++c) {
-            if (z_vals[c] == true)  {
-                ++instances;
-            }
-        }
-        if (instances > 1) { // double click
-            return true;
+bool is_dbl_pressed (int thres) {
+    
+    for (byte c = 0; c < sizeof(z_vals[0]); ++c) {
+        if (z_vals[0][c] == 0) {
+            return false;
         }
     }
-    return false;
+    if (abs(z_vals[1][0] - z_vals[1][1]) >= thres) {
+        return false;
+    }
+
+    return true;
 }
