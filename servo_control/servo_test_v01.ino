@@ -15,7 +15,7 @@ Servo RIGHT_SERVO;
 
 // 2.4g radio
 RF24 Radio(5,6); // CE, CSN
-const byte address[6] = "31412";
+const byte address[6] = "37412";
 
 // timekeeping
 unsigned long current_time = 0;
