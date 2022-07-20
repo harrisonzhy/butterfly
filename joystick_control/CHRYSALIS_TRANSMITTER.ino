@@ -12,7 +12,7 @@
 #define Z 10
 
 RF24 Radio(5,6); // CE, CSN
-const byte address[6] = "31412";
+const byte address[6] = "37412";
 
 int xyz_val[3] = {0,0,0};
 int x_val = 0;
@@ -34,7 +34,7 @@ void loop() {
 
     x_val = (int)analogRead(X);
     y_val = (int)analogRead(Y);
-    z_val = (int)digitalRead(2);
+    z_val = (int)digitalRead(10);
 
     xyz_val[0] = x_val;
     xyz_val[1] = y_val;

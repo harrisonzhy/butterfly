@@ -6,21 +6,23 @@
 #include <Servo.h>
 #include <nRF24L01.h>
 #include <RF24.h>
-  
+
 #define X A0            // RF24
 #define Y A1            // RF24
 #define Z 10            // RF24
+
 Servo LEFT_SERVO;
 Servo RIGHT_SERVO;
 
 // 2.4 ghz radio
 RF24 Radio(5,6); // CE, CSN
-const byte address[6] = "31412";
+const byte address[6] = "37412";
 
 // timekeeping
 unsigned long time_curr = 0;
 unsigned long time_prev = 0;
-unsigned long time_delay = 200;
+const int FLAP_DELAY = 200;
+const int SWITCH_DELAY = 500;
 
 // analog readings
 int xyz_val[3] = {0,0,0};
@@ -36,8 +38,6 @@ const int LEFT_THRES_ANLG = 400;
 const int DOWN_THRES_ANLG = 400;
 const int RIGHT_THRES_ANLG = 1022 - LEFT_THRES_ANLG;
 const int UP_THRES_ANLG = 1022 - DOWN_THRES_ANLG;
-const int FLAP_DELAY = 200;
-const int SWITCH_DELAY = 500;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -56,7 +56,7 @@ void setup() {
 
 }
 
-void loop() { // 7/19/22 find a way to implement timer for button delay timer
+void loop() {
     
     if (Radio.available()) {
             char msg_in[32] = "";
@@ -80,8 +80,7 @@ void loop() { // 7/19/22 find a way to implement timer for button delay timer
                 is_on = !is_on;
             }
         }
-    }   
-        
+    }       
 
     //x_val = analogRead(X); // joystick X
     //y_val = analogRead(Y); // joystick Y
