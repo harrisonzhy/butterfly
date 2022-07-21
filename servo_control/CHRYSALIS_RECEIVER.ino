@@ -53,7 +53,7 @@ void setup() {
     Radio.begin();
     Radio.openReadingPipe(0,address);
     Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
-    Radio.startListening();
+    Radio.startListening(); // sets as receiver
 
 }
 
@@ -77,7 +77,7 @@ void loop() {
                         z_vals[0][c] = z_val;
                     }
                     if (z_vals[1][c] == 0) {
-                        z_vals[1][c] = millis();    
+                        z_vals[1][c] = time_curr;    
                     }
                     if (abs(z_vals[1][0] - z_vals[1][1]) <= 10) { // 10 ms minimum delay
                         z_vals[0][1] = 0;
@@ -85,7 +85,7 @@ void loop() {
                     }
                 }
             }
-            if (is_dbl_pressed(10, SWITCH_DELAY) || 
+            if (is_dbl_pressed(10, SWITCH_DELAY) ||
                 abs(z_vals[1][0] - z_vals[1][1]) > SWITCH_DELAY) {
                 is_on = !is_on;
                 for (byte r = 0; r <= 1; ++r) {
@@ -103,44 +103,38 @@ void loop() {
         int y_uint8 = map(y_val, 0, 1023, 0, 255);
 
         // stationary or forward
-        LEFT_SERVO.write(get_angle(30));
-        RIGHT_SERVO.write(get_angle(30));
-        LEFT_SERVO.write(get_angle(-30));
-        RIGHT_SERVO.write(get_angle(-30));
+        servo_transmit(LEFT_SERVO, 30, FLAP_DELAY);
+        servo_transmit(RIGHT_SERVO, 30, FLAP_DELAY);
+        servo_transmit(LEFT_SERVO, -30, FLAP_DELAY);
+        servo_transmit(RIGHT_SERVO, -30, FLAP_DELAY);
 
         // turn left
         while (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {
             for (int i = 0; i < 3; i++) {
-                LEFT_SERVO.write(get_angle(20));
-                RIGHT_SERVO.write(get_angle(40));
-                LEFT_SERVO.write(get_angle(-40));
-                RIGHT_SERVO.write(get_angle(-20));
+                servo_transmit(LEFT_SERVO, 20, FLAP_DELAY);
+                servo_transmit(RIGHT_SERVO, 40, FLAP_DELAY);
+                servo_transmit(LEFT_SERVO, -40, FLAP_DELAY);
+                servo_transmit(RIGHT_SERVO, -20, FLAP_DELAY);                
             }
         }
 
         // turn right
         while (x_val > RIGHT_THRES_ANLG && y_val > UP_THRES_ANLG) {
             for (int i = 0; i < 3; i++) {
-                LEFT_SERVO.write(get_angle(40));
-                RIGHT_SERVO.write(get_angle(20));
-                LEFT_SERVO.write(get_angle(-20));
-                RIGHT_SERVO.write(get_angle(-40));
+                servo_transmit(LEFT_SERVO, 40, FLAP_DELAY);
+                servo_transmit(RIGHT_SERVO, 20, FLAP_DELAY);
+                servo_transmit(LEFT_SERVO, -20, FLAP_DELAY);
+                servo_transmit(RIGHT_SERVO, -40, FLAP_DELAY);                
             }
         }   
 
         // drop altitude
         while (y_val < DOWN_THRES_ANLG) {
             for (int i = 0; i < 3; i++) {
-                if (time_curr - time_prev >= DROP_DELAY) {
-                    LEFT_SERVO.write(get_angle(30));
-                    RIGHT_SERVO.write(get_angle(30));
-                    time_prev = time_curr;
-                }
-                if (time_curr - time_prev >= DROP_DELAY) {
-                    LEFT_SERVO.write(get_angle(-30));
-                    RIGHT_SERVO.write(get_angle(-30));
-                    time_prev = time_curr;
-                }
+                servo_transmit(LEFT_SERVO, 30, DROP_DELAY);
+                servo_transmit(RIGHT_SERVO, 30, DROP_DELAY);
+                servo_transmit(LEFT_SERVO, -30, DROP_DELAY);
+                servo_transmit(RIGHT_SERVO, -30, DROP_DELAY);
             }
         }
     } /* while (is_on) {} */
@@ -172,9 +166,9 @@ bool is_dbl_pressed (int min_thres, int max_thres) {
     return true;
 }
 
-void servo_transmit(Servo WING, int angle, int delay) {
+void servo_transmit(Servo MOTOR, int angle, int delay) {
     if (time_curr - time_prev >= delay) {
-    WING.write(get_angle(angle));
+    MOTOR.write(get_angle(angle));
     }
     time_prev = time_curr;
 }
