@@ -59,31 +59,40 @@ void setup() {
 void loop() {
     
     if (Radio.available()) {
-            char msg_in[32] = "";
-            Radio.read(&msg_in, sizeof(msg_in));
-            Radio.read(&xyz_val, sizeof(&xyz_val));
+        char msg_in[32] = "";
+        Radio.read(&msg_in, sizeof(msg_in));
+        Radio.read(&xyz_val, sizeof(&xyz_val));
 
-            x_val = (int)xyz_val[0];
-            y_val = (int)xyz_val[1];
-            z_val = (int)xyz_val[2];
+        x_val = (int)xyz_val[0];
+        y_val = (int)xyz_val[1];
+        z_val = (int)xyz_val[2];
 
-            if (z_val == 1) {
-                for (byte c = 0; c <= 1; ++c) {
-                    if (z_vals[0][c] != 0) {
-                        z_vals[0][c] = z_val;
-                    if (z_vals[1][c] != 0) {
-                        z_vals[1][c] = millis();    
-                    }
+        if (z_val == 1) {
+            for (byte c = 0; c <= 1; ++c) {
+                if (z_vals[0][c] == 0) {
+                    z_vals[0][c] = z_val;
+                }
+                if (z_vals[1][c] == 0) {
+                    z_vals[1][c] = millis();    
+                }
+                if (abs(z_vals[1][0] - z_vals[1][1]) <= 10) { // 10 ms minimum delay
+                    z_vals[0][1] = 0;
+                    z_vals[1][1] = 0;
                 }
             }
-            if (is_dbl_pressed(SWITCH_DELAY)) {
-                is_on = !is_on;
+        }
+        if (is_dbl_pressed(SWITCH_DELAY) || abs(z_vals[1][0] - z_vals[1][1]) > SWITCH_DELAY) {
+            is_on = !is_on;
+            for (byte r = 0; r <= 1; ++r) {
+                for (byte c = 0; c <= 1; ++c) {
+                    z_vals[r][d] = 0;
+                }
             }
         }
-    }       
+    }
 
-    //x_val = analogRead(X); // joystick X
-    //y_val = analogRead(Y); // joystick Y
+    // x_val = analogRead(X); // joystick X
+    // y_val = analogRead(Y); // joystick Y
 
     int x_uint8 = map(x_val, 0, 1023, 0, 255); // maps 0-1023 to 0-255
     int y_uint8 = map(y_val, 0, 1023, 0, 255);
@@ -152,9 +161,13 @@ int get_thres_deg (int thres_anlg) {
 }
 
 int get_angle (int displacement) {
-    if (displacement < -90) {displacement = -90;}
-    else if (displacement > 90) {displacement = 90;}
-    
+    if (displacement < -90) {
+        displacement = -90;
+    }
+    else if (displacement > 90) {
+        displacement = 90;
+    }
+
     return 90 + displacement;
 }
 
@@ -165,9 +178,15 @@ bool is_dbl_pressed (int thres) {
             return false;
         }
     }
-    if (abs(z_vals[1][0] - z_vals[1][1]) >= thres) {
+    if (abs(z_vals[1][0] - z_vals[1][1]) > thres) {
         return false;
     }
 
     return true;
+}
+
+void servo_transmit(Servo MOTOR, int angle, int delay) {
+    if (time_curr - time_prev >= delay) {
+    MOTOR.write(get_angle(angle));
+    }
 }
