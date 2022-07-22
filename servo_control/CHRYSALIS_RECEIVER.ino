@@ -7,9 +7,9 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-#define X A0            // RF24
-#define Y A1            // RF24
-#define Z 10            // RF24
+#define X A0
+#define Y A1
+#define Z 10
 
 Servo LEFT_SERVO;
 Servo RIGHT_SERVO;
@@ -26,12 +26,11 @@ const int DROP_DELAY    = 200;
 const int SWITCH_DELAY  = 500;
 
 // analog readings
-int xyz_val[3] = {0,0,0};
+unsigned long z_vals[2][2] = {{0,0}, 
+                              {0,0}};
 int x_val = 0;
 int y_val = 0;
 int z_val = 0;
-unsigned long z_vals[2][2] = {{0,0}, 
-                              {0,0}};
 bool is_on = false;
 
 // analog thresholds
@@ -41,6 +40,16 @@ const int RIGHT_THRES_ANLG = 1022 - LEFT_THRES_ANLG;
 const int UP_THRES_ANLG    = 1022 - DOWN_THRES_ANLG;
 
 ////////////////////////////////////////////////////////////////////
+
+struct Control {
+
+    int x_in = 0;
+    int y_in = 0;
+    int z_in = 0;
+
+};
+
+Control ctrl_data;
 
 void setup() {
 
@@ -65,11 +74,11 @@ void loop() {
         if (Radio.available()) {
             char msg_in[32] = "";
             Radio.read(&msg_in, sizeof(msg_in));
-            Radio.read(&xyz_val, sizeof(&xyz_val)); // ?
+            Radio.read(&ctrl_data, sizeof(Control));
 
-            x_val = (int)xyz_val[0];
-            y_val = (int)xyz_val[1];
-            z_val = (int)xyz_val[2];
+            x_val = (int)ctrl_data.x_in;
+            y_val = (int)ctrl_data.y_in;
+            z_val = (int)ctrl_data.z_in;
 
             if (z_val == 1) {
                 for (byte c = 0; c <= 1; ++c) {
@@ -90,7 +99,7 @@ void loop() {
                 is_on = !is_on;
                 for (byte r = 0; r <= 1; ++r) {
                     for (byte c = 0; c <= 1; ++c) {
-                        z_vals[r][d] = 0;
+                        z_vals[r][c] = 0;
                     }
                 }
             }
@@ -110,7 +119,7 @@ void loop() {
 
         // turn left
         while (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {
-            for (int i = 0; i < 3; i++) {
+            for (byte i = 0; i < 3; i++) {
                 servo_transmit(LEFT_SERVO, 20, FLAP_DELAY);
                 servo_transmit(RIGHT_SERVO, 40, FLAP_DELAY);
                 servo_transmit(LEFT_SERVO, -40, FLAP_DELAY);
@@ -120,7 +129,7 @@ void loop() {
 
         // turn right
         while (x_val > RIGHT_THRES_ANLG && y_val > UP_THRES_ANLG) {
-            for (int i = 0; i < 3; i++) {
+            for (byte i = 0; i < 3; i++) {
                 servo_transmit(LEFT_SERVO, 40, FLAP_DELAY);
                 servo_transmit(RIGHT_SERVO, 20, FLAP_DELAY);
                 servo_transmit(LEFT_SERVO, -20, FLAP_DELAY);
@@ -130,7 +139,7 @@ void loop() {
 
         // drop altitude
         while (y_val < DOWN_THRES_ANLG) {
-            for (int i = 0; i < 3; i++) {
+            for (byte i = 0; i < 3; i++) {
                 servo_transmit(LEFT_SERVO, 30, DROP_DELAY);
                 servo_transmit(RIGHT_SERVO, 30, DROP_DELAY);
                 servo_transmit(LEFT_SERVO, -30, DROP_DELAY);
@@ -175,7 +184,7 @@ void servo_transmit(Servo MOTOR, int angle, int delay) {
 
 ////////////////////////////////////////////////////////////////////
 
-/* CURRENTLY UNNEEDED */
+/* CURRENTLY UNUSED */
 
 /*
 int get_uint8 (float degrees) {
