@@ -30,7 +30,6 @@ struct Control {
 typedef struct Control Control;
 Control ctrl_data;
 
-
 void setup() {
 
   pinMode(Z, INPUT_PULLUP);
