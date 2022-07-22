@@ -18,9 +18,9 @@ const byte address[6] = "37412";
 
 struct Control {
 
-    int x_in = 0;
-    int y_in = 0;
-    int z_in = 0;
+    int x_tc = 0;
+    int y_tc = 0;
+    int z_tc = 0;
 
 };
 
@@ -39,9 +39,9 @@ void setup() {
 
 void loop() {
 
-    x_val = (int)analogRead(X);
-    y_val = (int)analogRead(Y);
-    z_val = (int)digitalRead(10);
+    x_tc = (int)analogRead(X);
+    y_tc = (int)analogRead(Y);
+    z_tc = (int)digitalRead(10);
 
     const char msg_out[] = "";
     Radio.write(&msg_out, sizeof(msg_out));

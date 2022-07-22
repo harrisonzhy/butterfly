@@ -12,12 +12,23 @@
 #define Z 10
 
 RF24 Radio(5,6); // CE, CSN
-const byte address[6] = "31412";
+const byte address[6] = "37412";
 
-int xyz_val[3] = {0,0,0};
 int x_val = 0;
 int y_val = 0;
 int z_val = 0;
+
+////////////////////////////////////////////////////////////////////
+
+struct Control {
+
+    int x_tc = 0;
+    int y_tc = 0;
+    int z_tc = 0;
+
+};
+
+Control ctrl_data;
 
 void setup() {
 
@@ -35,10 +46,10 @@ void loop() {
     // read analog joystick
     x_val = (int)analogRead(X);
     y_val = (int)analogRead(Y);
-    z_val = (int)digitalRead(2);
+    z_val = (int)digitalRead(10);
 
     const char msg_in[] = "";
     Radio.write(&msg_in, sizeof(msg_in));
-    Radio.write(&xyz_val, sizeof(xyz_val));
+    Radio.write(&ctrl_data, sizeof(Control));
 
 }

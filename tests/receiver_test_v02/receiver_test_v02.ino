@@ -5,10 +5,9 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-#define X A0            // RF24
-#define Y A1            // RF24
-#define Z 10            // RF24
-
+#define X A0
+#define Y A1
+#define Z 10
 Servo LEFT_SERVO;
 Servo RIGHT_SERVO;
 
@@ -23,7 +22,6 @@ const int FLAP_DELAY = 200;
 const int SWITCH_DELAY = 500;
 
 // analog readings
-int xyz_val[3] = {0,0,0};
 int x_val = 0;
 int y_val = 0;
 int z_val = 0;
@@ -39,10 +37,18 @@ const int UP_THRES_ANLG = 1022 - DOWN_THRES_ANLG;
 
 ////////////////////////////////////////////////////////////////////
 
+struct Control {
+
+    int x_tc = 0;
+    int y_tc = 0;
+    int z_tc = 0;
+
+};
+
 void setup() {
 
-
     Serial.begin(9600);
+    
     LEFT_SERVO.attach(3);
     RIGHT_SERVO.attach(4);
     LEFT_SERVO.write(get_angle(0));
@@ -51,37 +57,47 @@ void setup() {
     Radio.begin();
     Radio.openReadingPipe(0,address);
     Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
-    Radio.startListening();
+    Radio.startListening(); // sets as receiver
 
 }
 
 void loop() {
 
-    while(is_oon) {
       if (Radio.available()) {
               char msg_in[32] = "";
               Radio.read(&msg_in, sizeof(msg_in));
-              Radio.read(&xyz_val, sizeof(&xyz_val));
+              Radio.read(&ctrl_data, sizeof(Control));
   
-              x_val = (int)xyz_val[0];
-              y_val = (int)xyz_val[1];
-              z_val = (int)xyz_val[2];
+              x_val = (int)ctrl_data.x_in;
+              y_val = (int)ctrl_data.y_in;
+              z_val = (int)ctrl_data.z_in;
   
               if (z_val == 1) {
-                  for (byte c = 0; c <= 1; ++c) {
-                      if (z_vals[0][c] != 0) {
-                          z_vals[0][c] = z_val;
-                      if (z_vals[1][c] != 0) {
-                          z_vals[1][c] = millis();    
-                      }
-                  }
-              }
-              if (is_dbl_pressed(SWITCH_DELAY)) {
-                  is_on = !is_on;
-              }
-          }
+                for (byte c = 0; c <= 1; ++c) {
+                    if (z_vals[0][c] == 0) {
+                        z_vals[0][c] = z_val;
+                    }
+                    if (z_vals[1][c] == 0) {
+                        z_vals[1][c] = time_curr;    
+                    }
+                    if (abs(z_vals[1][0] - z_vals[1][1]) <= 10) { // 10 ms minimum delay
+                        z_vals[0][1] = 0;
+                        z_vals[1][1] = 0;
+                    }
+                }
+            }
+            if (is_dbl_pressed(10, SWITCH_DELAY) ||
+                abs(z_vals[1][0] - z_vals[1][1]) > SWITCH_DELAY) {
+                is_on = !is_on;
+                for (byte r = 0; r <= 1; ++r) {
+                    for (byte c = 0; c <= 1; ++c) {
+                        z_vals[r][c] = 0;
+                    }
+                }
+            }
       }  
-  
+   while(is_on) {
+
       while (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {
            LEFT_SERVO.write(get_angle(-60));
            delay(110);
@@ -92,15 +108,13 @@ void loop() {
       }
       while (y_val < DOWN_THRES_ANLG) {
            LEFT_SERVO.write(get_angle(30));
-           delay(110);
+           delay(1000);
            RIGHT_SERVO.write(get_angle(30));
            delay(1000);
       }
       
-    }
-    
-  
-    
+   } /*while (is_on) {} */
+
 }
 
 
@@ -132,14 +146,15 @@ int get_angle (int displacement) {
     return 90 + displacement;
 }
 
-bool is_dbl_pressed (int thres) {
+bool is_dbl_pressed (int min_thres, int max_thres) {
     
     for (byte c = 0; c < sizeof(z_vals[0]); ++c) {
         if (z_vals[0][c] == 0) {
             return false;
         }
     }
-    if (abs(z_vals[1][0] - z_vals[1][1]) >= thres) {
+    if (abs(z_vals[1][0] - z_vals[1][1]) > max_thres || 
+        abs(z_vals[1][0] - z_vals[1][1]) < min_thres) {
         return false;
     }
 
