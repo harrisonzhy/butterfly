@@ -48,7 +48,7 @@ struct Control {
     int z_tc = 0;
 
 };
-
+typedef struct Control Control;
 Control ctrl_data;
 
 void setup() {

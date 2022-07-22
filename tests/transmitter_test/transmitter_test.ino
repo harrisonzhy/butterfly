@@ -9,7 +9,7 @@
 
 #define X A0
 #define Y A1
-#define Z 10
+int Z = 10;
 
 RF24 Radio(5,6); // CE, CSN
 const byte address[6] = "37412";
@@ -19,7 +19,7 @@ int y_val = 0;
 int z_val = 0;
 
 ////////////////////////////////////////////////////////////////////
-/*
+
 struct Control {
 
     int x_tc;
@@ -30,39 +30,45 @@ struct Control {
 typedef struct Control Control;
 Control ctrl_data;
 
-*/
+
 void setup() {
 
+  pinMode(Z, INPUT_PULLUP);
   Serial.begin(9600);
-/*
+
   Radio.begin();
   Radio.openWritingPipe(address);
   Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
   Radio.stopListening(); // sets as transmitter
-*/
+
 }
 
 void loop() {
 
     // read analog joystick
-    x_val = analogRead(X);
-    y_val = analogRead(Y);
-    z_val = digitalRead(2);
+    ctrl_data.x_tc = (int)analogRead(X);
+    ctrl_data.y_tc = (int)analogRead(Y);
+    ctrl_data.z_tc = (int)(!digitalRead(Z));
 
-    Serial.println(x_val);
-    Serial.println(y_val);
-    Serial.println(z_val);
+    Serial.println(ctrl_data.x_tc);
+    Serial.print("  ");
+    Serial.print(ctrl_data.y_tc);
+    Serial.print("  ");
+    Serial.print(ctrl_data.z_tc);
     Serial.println("-------");
-/*
-    ctrl_data.x_tc = x_val;
-    ctrl_data.y_tc = y_val;
-    ctrl_data.z_tc = z_val;
+    delay(100);
 
+/*
+    Serial.println(ctrl_data.x_tc);
+    Serial.print("  ");
+    Serial.print(ctrl_data.y_tc);
+    Serial.print("  ");
+    Serial.print(ctrl_data.z_tc);
+    Serial.println("-------");
+    delay(100);
+*/
     const char msg_in[] = "";
     Radio.write(&msg_in, sizeof(msg_in));
     Radio.write(&ctrl_data, sizeof(Control));
-
-*/
-
 
 }

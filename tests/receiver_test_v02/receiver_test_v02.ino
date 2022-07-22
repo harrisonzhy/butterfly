@@ -54,7 +54,7 @@ void setup() {
     LEFT_SERVO.attach(3);
     RIGHT_SERVO.attach(4);
     LEFT_SERVO.write(get_angle(0));
-    RIGHT_SERVO.write(get_angle(0));
+    RIGHT_SERVO.write(get_angle(0)); 
 
     Radio.begin();
     Radio.openReadingPipe(0,address);

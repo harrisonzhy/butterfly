@@ -9,7 +9,7 @@
 
 #define X A0
 #define Y A1
-#define Z 10
+int Z = 10;
 
 RF24 Radio(5,6); // CE, CSN
 const byte address[6] = "37412";
@@ -29,6 +29,7 @@ Control ctrl_data;
 void setup() {
 
     Serial.begin(9600);
+    pinMode(Z, INPUT_PULLUP);
 
     Radio.begin();
     Radio.openWritingPipe(address);
@@ -41,7 +42,7 @@ void loop() {
 
     x_tc = (int)analogRead(X);
     y_tc = (int)analogRead(Y);
-    z_tc = (int)digitalRead(10);
+    z_tc = (int)(!digitalRead(Z));
 
     const char msg_out[] = "";
     Radio.write(&msg_out, sizeof(msg_out));
