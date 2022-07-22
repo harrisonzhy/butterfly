@@ -45,6 +45,8 @@ struct Control {
 
 };
 
+Control ctrl_data;
+
 void setup() {
 
     Serial.begin(9600);
@@ -68,9 +70,9 @@ void loop() {
               Radio.read(&msg_in, sizeof(msg_in));
               Radio.read(&ctrl_data, sizeof(Control));
   
-              x_val = (int)ctrl_data.x_in;
-              y_val = (int)ctrl_data.y_in;
-              z_val = (int)ctrl_data.z_in;
+              x_val = (int)ctrl_data.x_tc;
+              y_val = (int)ctrl_data.y_tc;
+              z_val = (int)ctrl_data.z_tc;
   
               if (z_val == 1) {
                 for (byte c = 0; c <= 1; ++c) {
@@ -86,16 +88,23 @@ void loop() {
                     }
                 }
             }
-            if (is_dbl_pressed(10, SWITCH_DELAY) ||
-                abs(z_vals[1][0] - z_vals[1][1]) > SWITCH_DELAY) {
-                is_on = !is_on;
-                for (byte r = 0; r <= 1; ++r) {
-                    for (byte c = 0; c <= 1; ++c) {
-                        z_vals[r][c] = 0;
-                    }
+        if (is_dbl_pressed(10, SWITCH_DELAY)) {
+            is_on = !is_on;
+            for (byte r = 0; r <= 1; ++r) {
+                for (byte c = 0; c <= 1; ++c) {
+                    z_vals[r][c] = 0;
                 }
             }
-      }  
+        }
+        else if (abs(z_vals[1][0] - z_vals[1][1]) > SWITCH_DELAY) {
+            for (byte r = 0; r <= 1; ++r) {
+                for (byte c = 0; c <= 1; ++c) {
+                    z_vals[r][c] = 0;
+                }
+            }
+        }
+   }  
+   
    while(is_on) {
 
       while (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {

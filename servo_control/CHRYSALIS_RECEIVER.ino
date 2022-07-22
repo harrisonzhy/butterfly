@@ -93,9 +93,15 @@ void loop() {
                 }
             }
         }
-        if (is_dbl_pressed(10, SWITCH_DELAY) ||
-            abs(z_vals[1][0] - z_vals[1][1]) > SWITCH_DELAY) {
+        if (is_dbl_pressed(10, SWITCH_DELAY)) {
             is_on = !is_on;
+            for (byte r = 0; r <= 1; ++r) {
+                for (byte c = 0; c <= 1; ++c) {
+                    z_vals[r][c] = 0;
+                }
+            }
+        }
+        else if (abs(z_vals[1][0] - z_vals[1][1]) > SWITCH_DELAY) {
             for (byte r = 0; r <= 1; ++r) {
                 for (byte c = 0; c <= 1; ++c) {
                     z_vals[r][c] = 0;
