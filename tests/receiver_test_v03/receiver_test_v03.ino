@@ -39,9 +39,9 @@ const int UP_THRES_ANLG = 1022 - DOWN_THRES_ANLG;
 
 struct control {
 
-    int x_tc = 0;
-    int y_tc = 0;
-    int z_tc = 0;
+    int x_tc;
+    int y_tc;
+    int z_tc;
 
 };
 typedef struct control Control;
@@ -68,8 +68,8 @@ void loop() {
 
     bool is_on = true;
 
-    char msg_in[32] = "";
-    Radio.read(&msg_in, sizeof(msg_in));
+    //char msg_in[32] = "";
+    //Radio.read(&msg_in, sizeof(msg_in));
     Radio.read(&ctrl_data, sizeof(Control));
 
     x_val = (int)ctrl_data.x_tc;
@@ -83,7 +83,7 @@ void loop() {
     Serial.print("  ");
     Serial.print(z_val);
     Serial.println("-----");
-    delay(100);
+    delay(200);
 
     /*
     if (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {

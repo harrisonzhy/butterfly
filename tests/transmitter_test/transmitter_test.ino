@@ -37,7 +37,7 @@ void setup() {
 
   Radio.begin();
   Radio.openWritingPipe(address); // 250 kbps receiving
-  Radio.setPALevel(RF24_PA_MIN); // TEST min transceiving distance
+  Radio.setPALevel(RF24_PA_MIN); // test min transceiving distance
   Radio.stopListening(); // sets as transmitter
 
 }
@@ -55,10 +55,11 @@ void loop() {
     Serial.print("  ");
     Serial.print(ctrl_data.z_tc);
     Serial.println("-------");
-    delay(100);
 
-    const char msg_in[] = "";
-    Radio.write(&msg_in, sizeof(msg_in));
+    //const char msg_in[] = "";
+    //Radio.write(&msg_in, sizeof(msg_in));
     Radio.write(&ctrl_data, sizeof(Control));
+    delay(200);
+
 
 }

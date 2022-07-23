@@ -31,7 +31,7 @@ unsigned long z_vals[2][2] = {{0,0},
 int x_val = 0;
 int y_val = 0;
 int z_val = 0;
-bool is_on = false;
+bool is_on = true;
 
 // analog thresholds
 const int LEFT_THRES_ANLG  = 400;
@@ -41,14 +41,14 @@ const int UP_THRES_ANLG    = 1022 - DOWN_THRES_ANLG;
 
 ////////////////////////////////////////////////////////////////////
 
-struct Control {
+struct control {
 
-    int x_tc = 0;
-    int y_tc = 0;
-    int z_tc = 0;
+    int x_tc;
+    int y_tc;
+    int z_tc;
 
 };
-typedef struct Control Control;
+typedef struct control Control;
 Control ctrl_data;
 
 void setup() {
@@ -61,6 +61,7 @@ void setup() {
 
     Radio.begin();
     Radio.openReadingPipe(0,address);
+    Radio.setDataRate(RF24_250KBPS);
     Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
     Radio.startListening(); // sets as receiver
 
@@ -71,8 +72,8 @@ void loop() {
     time_curr = millis();
 
     if (Radio.available()) {
-        char msg_in[32] = "";
-        Radio.read(&msg_in, sizeof(msg_in));
+        //char msg_in[32] = "";
+        //Radio.read(&msg_in, sizeof(msg_in));
         Radio.read(&ctrl_data, sizeof(Control));
 
         x_val = (int)ctrl_data.x_tc;

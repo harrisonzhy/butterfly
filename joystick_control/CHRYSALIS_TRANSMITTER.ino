@@ -16,14 +16,14 @@ const byte address[6] = "37412";
 
 ////////////////////////////////////////////////////////////////////
 
-struct Control {
+struct control {
 
-    int x_tc = 0;
-    int y_tc = 0;
-    int z_tc = 0;
+    int x_tc;
+    int y_tc;
+    int z_tc;
 
 };
-
+typedef struct control Control;
 Control ctrl_data;
 
 void setup() {
@@ -33,6 +33,7 @@ void setup() {
 
     Radio.begin();
     Radio.openWritingPipe(address);
+    Radio.setDataRate(RF24_250KBPS);
     Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
     Radio.stopListening(); // sets as transmitter
 
@@ -44,8 +45,8 @@ void loop() {
     y_tc = (int)analogRead(Y);
     z_tc = (int)(!digitalRead(Z));
 
-    const char msg_out[] = "";
-    Radio.write(&msg_out, sizeof(msg_out));
+    //const char msg_out[] = "";
+    //Radio.write(&msg_out, sizeof(msg_out));
     Radio.write(&ctrl_data, sizeof(Control));
 
 }
