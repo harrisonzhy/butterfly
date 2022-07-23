@@ -9,7 +9,7 @@
 
 #define X A0
 #define Y A1
-int Z = 10;
+const int Z = 10;
 
 RF24 Radio(5,6); // CE, CSN
 const byte address[6] = "37412";
@@ -20,14 +20,14 @@ int z_val = 0;
 
 ////////////////////////////////////////////////////////////////////
 
-struct Control {
+struct control {
 
     int x_tc;
     int y_tc;
     int z_tc;
 
 };
-typedef struct Control Control;
+typedef struct control Control;
 Control ctrl_data;
 
 void setup() {
@@ -36,8 +36,8 @@ void setup() {
   Serial.begin(9600);
 
   Radio.begin();
-  Radio.openWritingPipe(address);
-  Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
+  Radio.openWritingPipe(address); // 250 kbps receiving
+  Radio.setPALevel(RF24_PA_MIN); // TEST min transceiving distance
   Radio.stopListening(); // sets as transmitter
 
 }
@@ -57,15 +57,6 @@ void loop() {
     Serial.println("-------");
     delay(100);
 
-/*
-    Serial.println(ctrl_data.x_tc);
-    Serial.print("  ");
-    Serial.print(ctrl_data.y_tc);
-    Serial.print("  ");
-    Serial.print(ctrl_data.z_tc);
-    Serial.println("-------");
-    delay(100);
-*/
     const char msg_in[] = "";
     Radio.write(&msg_in, sizeof(msg_in));
     Radio.write(&ctrl_data, sizeof(Control));

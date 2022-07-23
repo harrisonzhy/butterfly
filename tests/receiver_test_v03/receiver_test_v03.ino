@@ -7,7 +7,7 @@
 
 #define X A0
 #define Y A1
-#define Z 10
+const int Z = 10;
 Servo LEFT_SERVO;
 Servo RIGHT_SERVO;
 
@@ -37,14 +37,14 @@ const int UP_THRES_ANLG = 1022 - DOWN_THRES_ANLG;
 
 ////////////////////////////////////////////////////////////////////
 
-struct Control {
+struct control {
 
     int x_tc = 0;
     int y_tc = 0;
     int z_tc = 0;
 
 };
-typedef struct Control Control;
+typedef struct control Control;
 Control ctrl_data;
 
 void setup() {
@@ -57,41 +57,55 @@ void setup() {
     RIGHT_SERVO.write(get_angle(0)); 
 
     Radio.begin();
-    Radio.openReadingPipe(0,address);
-    Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
+    Radio.openReadingPipe(address);
+    Radio.setDataRate(RF24_250KBPS); // 250 kbps receiving
+    Radio.setPALevel(RF24_PA_MIN); // test min transceiving distance
     Radio.startListening(); // sets as receiver
 
 }
 
 void loop() {
-      bool is_on = true;
-      
-      if (Radio.available()) {
-              char msg_in[32] = "";
-              Radio.read(&msg_in, sizeof(msg_in));
-              Radio.read(&ctrl_data, sizeof(Control));
-  
-              x_val = (int)ctrl_data.x_tc;
-              y_val = (int)ctrl_data.y_tc;
-              z_val = (int)ctrl_data.z_tc;
-      }
-      
-      while (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {
+
+    bool is_on = true;
+
+    char msg_in[32] = "";
+    Radio.read(&msg_in, sizeof(msg_in));
+    Radio.read(&ctrl_data, sizeof(Control));
+
+    x_val = (int)ctrl_data.x_tc;
+    y_val = (int)ctrl_data.y_tc;
+    z_val = (int)ctrl_data.z_tc;
+
+    // print received values
+    Serial.print(x_val);
+    Serial.print("  ");
+    Serial.print(y_val);
+    Serial.print("  ");
+    Serial.print(z_val);
+    Serial.println("-----");
+    delay(100);
+
+    /*
+    if (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {
            LEFT_SERVO.write(get_angle(-60));
            delay(110);
-      }
-      while (x_val < RIGHT_THRES_ANLG && y_val > UP_THRES_ANLG) {
+    }
+    if (x_val < RIGHT_THRES_ANLG && y_val > UP_THRES_ANLG) {
            RIGHT_SERVO.write(get_angle(-60));
            delay(110);
-      }
-      while (y_val < DOWN_THRES_ANLG) {
+    }
+    if (y_val < DOWN_THRES_ANLG) {
            LEFT_SERVO.write(get_angle(30));
            delay(1000);
            RIGHT_SERVO.write(get_angle(30));
            delay(1000);
-      }
+    }
+    */
       
 }
+
+
+
 
 
 
