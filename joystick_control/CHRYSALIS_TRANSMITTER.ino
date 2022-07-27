@@ -41,12 +41,12 @@ void setup() {
 
 void loop() {
 
-    x_tc = (int)analogRead(X);
-    y_tc = (int)analogRead(Y);
-    z_tc = (int)(!digitalRead(Z));
+    control.x_tc = (int)analogRead(X);
+    control.y_tc = (int)analogRead(Y);
+    control.z_tc = (int)(!digitalRead(Z));
 
     //const char msg_out[] = "";
     //Radio.write(&msg_out, sizeof(msg_out));
-    Radio.write(&ctrl_data, sizeof(Control));
+    Radio.write(&ctrl_data, sizeof(ctrl_data));
 
 }

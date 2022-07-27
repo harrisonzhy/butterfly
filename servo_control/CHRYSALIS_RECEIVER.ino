@@ -31,7 +31,7 @@ unsigned long z_vals[2][2] = {{0,0},
 int x_val = 0;
 int y_val = 0;
 int z_val = 0;
-bool is_on = true;
+bool is_on = false;
 
 // analog thresholds
 const int LEFT_THRES_ANLG  = 400;
@@ -74,12 +74,13 @@ void loop() {
     if (Radio.available()) {
         //char msg_in[32] = "";
         //Radio.read(&msg_in, sizeof(msg_in));
-        Radio.read(&ctrl_data, sizeof(Control));
+        Radio.read(&ctrl_data, sizeof(ctrl_data));
 
         x_val = (int)ctrl_data.x_tc;
         y_val = (int)ctrl_data.y_tc;
         z_val = (int)ctrl_data.z_tc;
 
+        // checks if butterfly is switched on
         if (z_val == 1) {
             for (byte c = 0; c <= 1; ++c) {
                 if (z_vals[0][c] == 0) {
@@ -88,7 +89,7 @@ void loop() {
                 if (z_vals[1][c] == 0) {
                     z_vals[1][c] = time_curr;    
                 }
-                if (abs(z_vals[1][0] - z_vals[1][1]) <= 10) { // 10 ms minimum delay
+                if (abs(z_vals[1][0] - z_vals[1][1]) <= 5) { // 5 ms minimum delay
                     z_vals[0][1] = 0;
                     z_vals[1][1] = 0;
                 }

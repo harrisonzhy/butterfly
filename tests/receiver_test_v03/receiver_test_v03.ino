@@ -73,9 +73,9 @@ void loop() {
         //Radio.read(&msg_in, sizeof(msg_in));
         Radio.read(&ctrl_data, sizeof(ctrl_data));
     
-        x_val = (int)control.x_tc;
-        y_val = (int)control.y_tc;
-        z_val = (int)control.z_tc;
+        x_val = (int)ctrl_data.x_tc;
+        y_val = (int)ctrl_data.y_tc;
+        z_val = (int)ctrl_data.z_tc;
     
         // print received values
         Serial.print(x_val);
