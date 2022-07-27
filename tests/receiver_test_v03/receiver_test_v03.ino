@@ -57,9 +57,9 @@ void setup() {
     RIGHT_SERVO.write(get_angle(0)); 
 
     Radio.begin();
-    Radio.openReadingPipe(address);
+    Radio.openReadingPipe(0, address);
     Radio.setDataRate(RF24_250KBPS); // 250 kbps receiving
-    Radio.setPALevel(RF24_PA_MIN); // test min transceiving distance
+    Radio.setPALevel(RF24_PA_MAX); // test max transceiving distance
     Radio.startListening(); // sets as receiver
 
 }
@@ -68,21 +68,24 @@ void loop() {
 
     bool is_on = true;
 
-    //char msg_in[32] = "";
-    //Radio.read(&msg_in, sizeof(msg_in));
-    Radio.read(&ctrl_data, sizeof(Control));
-
-    x_val = (int)ctrl_data.x_tc;
-    y_val = (int)ctrl_data.y_tc;
-    z_val = (int)ctrl_data.z_tc;
-
-    // print received values
-    Serial.print(x_val);
-    Serial.print("  ");
-    Serial.print(y_val);
-    Serial.print("  ");
-    Serial.print(z_val);
-    Serial.println("-----");
+    if (Radio.available()) {
+        //char msg_in[32] = "";
+        //Radio.read(&msg_in, sizeof(msg_in));
+        Radio.read(&ctrl_data, sizeof(ctrl_data));
+    
+        x_val = (int)control.x_tc;
+        y_val = (int)control.y_tc;
+        z_val = (int)control.z_tc;
+    
+        // print received values
+        Serial.print(x_val);
+        Serial.print("  ");
+        Serial.print(y_val);
+        Serial.print("  ");
+        Serial.print(z_val);
+        Serial.println("-----");
+    }
+    
     delay(200);
 
     /*
