@@ -30,6 +30,8 @@ void setup() {
 
   pinMode(Z, INPUT_PULLUP);
   Serial.begin(9600);
+  Serial.flush();
+  Serial.println("hi");
 
   Radio.begin();
   Radio.openWritingPipe(address); // 250 kbps receiving
@@ -43,15 +45,15 @@ void loop() {
 
     if (Radio.available()) {
         // read analog joystick
-        control.x_tc = (int)analogRead(X);
-        control.y_tc = (int)analogRead(Y);
-        control.z_tc = (int)(!digitalRead(Z));
+        ctrl_data.x_tc = (int)analogRead(X);
+        ctrl_data.y_tc = (int)analogRead(Y);
+        ctrl_data.z_tc = (int)(!digitalRead(Z));
     
-        Serial.println(control.x_tc);
+        Serial.println(ctrl_data.x_tc);
         Serial.print("  ");
-        Serial.print(control.y_tc);
+        Serial.print(ctrl_data.y_tc);
         Serial.print("  ");
-        Serial.print(cobtrol.z_tc);
+        Serial.print(ctrl_data.z_tc);
         Serial.println("-------");
     
         //const char msg_in[] = "";
