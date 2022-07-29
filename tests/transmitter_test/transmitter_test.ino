@@ -29,7 +29,7 @@ Control ctrl_data;
 void setup() {
 
   pinMode(Z, INPUT_PULLUP);
-  Serial.begin(9600);
+  Serial.begin(19200);
   Serial.flush();
   Serial.println("hi");
 
@@ -41,27 +41,29 @@ void setup() {
 
 }
 
+int analog[3] = {0,0,0};
+
 void loop() {
 
-    if (Radio.available()) {
+  //  if (Radio.available()) {
         // read analog joystick
-        ctrl_data.x_tc = (int)analogRead(X);
-        ctrl_data.y_tc = (int)analogRead(Y);
-        ctrl_data.z_tc = (int)(!digitalRead(Z));
+        analog[0] = (int)analogRead(X);
+        analog[1] = (int)analogRead(Y);
+        analog[2] = (int)(!digitalRead(Z));
     
-        Serial.println(ctrl_data.x_tc);
+        Serial.println(analog[0]);
         Serial.print("  ");
-        Serial.print(ctrl_data.y_tc);
+        Serial.print(analog[1]);
         Serial.print("  ");
-        Serial.print(ctrl_data.z_tc);
+        Serial.print(analog[2]);
         Serial.println("-------");
     
         //const char msg_in[] = "";
         //Radio.write(&msg_in, sizeof(msg_in));
-        Radio.write(&ctrl_data, sizeof(ctrl_data));
-    }
+        Radio.write(&analog, sizeof(analog));
+   // }
     
-    delay(200);
+    delay(100);
 
 
 }

@@ -64,18 +64,20 @@ void setup() {
 
 }
 
+int analog[3] = {0,0,0};
+
 void loop() {
 
     bool is_on = true;
 
-    if (Radio.available()) {
+//    if (Radio.available()) {
         //char msg_in[32] = "";
         //Radio.read(&msg_in, sizeof(msg_in));
-        Radio.read(&ctrl_data, sizeof(ctrl_data));
+        Radio.read(&analog, sizeof(analog));
     
-        x_val = (int)ctrl_data.x_tc;
-        y_val = (int)ctrl_data.y_tc;
-        z_val = (int)ctrl_data.z_tc;
+        x_val = (int)analog[0];
+        y_val = (int)analog[1];
+        z_val = (int)analog[2];
     
         // print received values
         Serial.print(x_val);
@@ -84,9 +86,9 @@ void loop() {
         Serial.print("  ");
         Serial.print(z_val);
         Serial.println("-----");
-    }
+//    }
     
-    delay(200);
+    delay(100);
 
     /*
     if (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {
