@@ -5,8 +5,7 @@
 #include <SPI.h>
 #include <Servo.h>
 #include <nRF24L01.h>
-#include <RF24.h>
-
+#include "RF24.h"
 #define X A0
 #define Y A1
 const int Z = 10;
