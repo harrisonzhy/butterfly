@@ -1,0 +1,20 @@
+
+/* CHRYSALIS PINOUT NOTES */
+
+RECEIVER :
+
+Left servo      | 3
+Right servo     | 4
+NRF24L01     CE | 5
+NRF24L01     CS | 6
+ADDRESS         | 37412
+
+TRANSMITTER :
+
+Control X       | A0
+Control Y       | A1
+Control Z       | 10
+NRF24L01     CE | 5
+NRF24L01     CS | 6
+ADDRESS         | 37412
+
