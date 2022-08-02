@@ -7,9 +7,12 @@ const byte address[6] = "00001";
  
 void setup() {
     Serial.begin(9600);
-    delay(1000);
     
     radio.begin();
+    while(!radio.available()) {
+      Serial.println("not available");
+      radio.begin();
+    }
     radio.openReadingPipe(0,address);
     radio.setPALevel(RF24_PA_MIN);
     radio.startListening();
@@ -20,12 +23,7 @@ void setup() {
 }
 
 void loop() {
-    if (!radio.available()) {
-      Serial.println("not available");
-      Serial.println(radio.isChipConnected());
-      //radio.printDetails();
-      radio.begin();
-    }
+
     if (radio.available()) {
       Serial.println("online");
       char text[32] = {0};

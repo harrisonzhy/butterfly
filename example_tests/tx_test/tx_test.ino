@@ -22,6 +22,7 @@ void setup() {
 void loop() {
     if (!radio.available()) {
       Serial.println("not available");
+      Serial.println(radio.isChipConnected());
       radio.begin();
     }
     else if (radio.available()) {
