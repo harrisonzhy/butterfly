@@ -1,51 +1,35 @@
+/*
+* Arduino Wireless Communication Tutorial
+*       Example 1 - Receiver Code
+*                
+* by Dejan Nedelkovski, www.HowToMechatronics.com
+* 
+* Library: TMRh20/RF24, https://github.com/tmrh20/RF24/
+*/
+
 #include <SPI.h>
 #include <nRF24L01.h>
-#include <RF24.h>
+#include "RF24.h"
 
-#define CE_PIN   7
-#define CSN_PIN  8
+RF24 radio(7, 8); // CE, CSN
 
-const byte thisSlaveAddress[5] = {'R','x','A','A','A'};
-
-RF24 radio(CE_PIN, CSN_PIN);
-
-char dataReceived[10]; // this must match dataToSend in the TX
-bool newData = false;
-
-//===========
+const byte address[6] = "00001";
 
 void setup() {
-
-    Serial.begin(9600);
-    delay(5000);
-
-    Serial.println("SimpleRx Starting");
-    radio.begin();
-    radio.setDataRate( RF24_250KBPS );
-    radio.openReadingPipe(1, thisSlaveAddress);
-    radio.startListening();
+  Serial.begin(57600);
+  delay(5000);
+  Serial.println("started");
+  
+  radio.begin();
+  radio.openReadingPipe(0, address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.startListening();
 }
-
-//=============
 
 void loop() {
-    getData();
-    showData();
-}
-
-//==============
-
-void getData() {
-    if ( radio.available() ) {
-        radio.read( &dataReceived, sizeof(dataReceived) );
-        newData = true;
-    }
-}
-
-void showData() {
-    if (newData == true) {
-        Serial.print("Data received ");
-        Serial.println(dataReceived);
-        newData = false;
-    }
+  if (radio.available()) {
+    char text[32] = "";
+    radio.read(&text, sizeof(text));
+    Serial.println(text);
+  }
 }

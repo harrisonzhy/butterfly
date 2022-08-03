@@ -9,13 +9,13 @@
 
 #define X A0
 #define Y A1
-#define Z 10
+int Z = 10;
 
 Servo LEFT_SERVO;
 Servo RIGHT_SERVO;
 
 // 2.4 GHz radio
-RF24 Radio(5,6); // CE, CSN
+RF24 Radio(7,8); // CE, CSN
 const byte address[6] = "37412";
 
 // timekeeping
@@ -54,6 +54,8 @@ Control ctrl_data;
 void setup() {
 
     Serial.begin(9600);
+    delay(5000);
+    
     LEFT_SERVO.attach(3);
     RIGHT_SERVO.attach(4);
     LEFT_SERVO.write(get_angle(0));
@@ -61,7 +63,6 @@ void setup() {
 
     Radio.begin();
     Radio.openReadingPipe(0,address);
-    Radio.setDataRate(RF24_250KBPS);
     Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
     Radio.startListening(); // sets as receiver
 
@@ -72,8 +73,8 @@ void loop() {
     time_curr = millis();
 
     if (Radio.available()) {
-        //char msg_in[32] = "";
-        //Radio.read(&msg_in, sizeof(msg_in));
+        char msg_in[32] = "";
+        Radio.read(&msg_in, sizeof(msg_in));
         Radio.read(&ctrl_data, sizeof(ctrl_data));
 
         x_val = (int)ctrl_data.x_tc;

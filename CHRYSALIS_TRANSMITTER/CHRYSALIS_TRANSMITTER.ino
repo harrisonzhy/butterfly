@@ -29,11 +29,12 @@ Control ctrl_data;
 void setup() {
 
     Serial.begin(9600);
+    delay(5000);
+    
     pinMode(Z, INPUT_PULLUP);
-
+    
     Radio.begin();
     Radio.openWritingPipe(address);
-    Radio.setDataRate(RF24_250KBPS);
     Radio.setPALevel(RF24_PA_MAX); // max transceiving distance
     Radio.stopListening(); // sets as transmitter
 
@@ -45,8 +46,8 @@ void loop() {
     control.y_tc = (int)analogRead(Y);
     control.z_tc = (int)(!digitalRead(Z));
 
-    //const char msg_out[] = "";
-    //Radio.write(&msg_out, sizeof(msg_out));
+    const char msg_out[] = "";
+    Radio.write(&msg_out, sizeof(msg_out));
     Radio.write(&ctrl_data, sizeof(ctrl_data));
 
 }
