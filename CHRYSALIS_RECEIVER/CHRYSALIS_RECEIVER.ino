@@ -95,7 +95,7 @@ void loop() {
                     z_vals[1][1] = 0;
                 }
             }
-        }
+        
         if (is_dbl_pressed(10, SWITCH_DELAY)) {
             is_on = !is_on;
             for (byte r = 0; r <= 1; ++r) {
@@ -111,6 +111,10 @@ void loop() {
                 }
             }
         }
+        
+    }
+        Serial.print("This butterfly is on (T/F): ");
+        Serial.println(is_on);
     }
 
     while (is_on) {

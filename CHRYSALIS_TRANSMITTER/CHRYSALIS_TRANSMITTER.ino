@@ -54,5 +54,5 @@ void loop() {
     // Radio.write(&msg_out, sizeof(msg_out));
     Radio.write(&ctrl_data, sizeof(control));
 
-    delay(90);
+    delay(110);
 }
