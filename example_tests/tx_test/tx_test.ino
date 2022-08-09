@@ -16,7 +16,7 @@ RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00001";
 
 void setup() {
-  Serial.println(57600);
+  Serial.begin(9600);
   delay(5000);
   
   radio.begin();

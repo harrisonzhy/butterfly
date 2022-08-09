@@ -9,9 +9,9 @@
 
 #define X A0
 #define Y A1
-int Z = 10;
+int Z = 9;
 
-RF24 Radio(5,6); // CE, CSN
+RF24 Radio(7,8); // CE, CSN
 const byte address[6] = "37412";
 
 ////////////////////////////////////////////////////////////////////
@@ -42,12 +42,17 @@ void setup() {
 
 void loop() {
 
-    control.x_tc = (int)analogRead(X);
-    control.y_tc = (int)analogRead(Y);
-    control.z_tc = (int)(!digitalRead(Z));
+    ctrl_data.x_tc = (int)analogRead(X);
+    ctrl_data.y_tc = (int)analogRead(Y);
+    ctrl_data.z_tc = (int)(!digitalRead(Z));
 
-    const char msg_out[] = "";
-    Radio.write(&msg_out, sizeof(msg_out));
-    Radio.write(&ctrl_data, sizeof(ctrl_data));
+    Serial.println(ctrl_data.x_tc);
+    Serial.println(ctrl_data.y_tc);
+    Serial.println(ctrl_data.z_tc);
 
+    //const char msg_out[] = "";
+    // Radio.write(&msg_out, sizeof(msg_out));
+    Radio.write(&ctrl_data, sizeof(control));
+
+    delay(90);
 }

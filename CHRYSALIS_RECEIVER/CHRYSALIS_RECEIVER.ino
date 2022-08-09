@@ -7,10 +7,6 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-#define X A0
-#define Y A1
-int Z = 10;
-
 Servo LEFT_SERVO;
 Servo RIGHT_SERVO;
 
@@ -56,8 +52,8 @@ void setup() {
     Serial.begin(9600);
     delay(5000);
     
-    LEFT_SERVO.attach(3);
-    RIGHT_SERVO.attach(4);
+    LEFT_SERVO.attach(2);
+    RIGHT_SERVO.attach(3);
     LEFT_SERVO.write(get_angle(0));
     RIGHT_SERVO.write(get_angle(0));
 
@@ -73,14 +69,18 @@ void loop() {
     time_curr = millis();
 
     if (Radio.available()) {
-        char msg_in[32] = "";
-        Radio.read(&msg_in, sizeof(msg_in));
-        Radio.read(&ctrl_data, sizeof(ctrl_data));
+        // char msg_in[32] = "";
+        // Radio.read(&msg_in, sizeof(msg_in));
+        Radio.read(&ctrl_data, sizeof(control));
 
         x_val = (int)ctrl_data.x_tc;
         y_val = (int)ctrl_data.y_tc;
         z_val = (int)ctrl_data.z_tc;
 
+        Serial.println(x_val);
+        Serial.println(y_val);
+        Serial.println(z_val);
+        
         // checks if butterfly is switched on
         if (z_val == 1) {
             for (byte c = 0; c <= 1; ++c) {
@@ -125,7 +125,7 @@ void loop() {
         servo_transmit(LEFT_SERVO, 30, FLAP_DELAY, true);
         servo_transmit(RIGHT_SERVO, 30, FLAP_DELAY, false);
         servo_transmit(LEFT_SERVO, -30, FLAP_DELAY, true);
-        servo_transmit(RIGHT_SERVO, -30, FLAP_DELAY), false;
+        servo_transmit(RIGHT_SERVO, -30, FLAP_DELAY, false);
 
         // turn left
         while (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {
