@@ -15,7 +15,11 @@ RF24 Radio(7,8); // CE, CSN
 const byte address[6] = "37412";
 
 // timekeeping
+int time_prev = 0;
+int time_curr = 0;
+
 unsigned long press_time = 0;
+unsigned long min_time   = 0;
 unsigned long max_time   = 0;
 int clicks = 0;
 const int FLAP_DELAY   = 110;
@@ -203,7 +207,7 @@ void swt_signal(int z, int min_thres, int max_thres) {
         }
 }
 
-void dbl_prs (int z, unsigned long max_thres)
+void dbl_prs (int z, unsigned long max_thres) {
 
     if (z == 0) {
         return;
@@ -213,53 +217,27 @@ void dbl_prs (int z, unsigned long max_thres)
     
         if (clicks == 0) {
             press_time = millis();
-            max_time = press_time + max_thres;    
+            min_time = press_time - 10;
+            max_time = press_time + max_thres;
             clicks = 1;
         }
 
-        else if (clicks == 1 && millis() < max_time) {
-            Serial.println("Button Pressed twice");
+        else if (clicks == 1 && millis() < max_time && millis() - min_time > 250) {
             is_on = !is_on;
-        
-            /*
-            if (LED2Status == LOW){
-                digitalWrite(LED2, HIGH);
-                LED2Status = HIGH;
-            }
-
-            else if (LED2Status == HIGH){
-                digitalWrite(LED2, LOW);
-                LED2Status = LOW;
-            }
-            */ 
-
-            //set variables back to 0
+       
             press_time = 0;
             max_time = 0;
             clicks = 0;      
         }    
     }
 
-    if (clicks == 1 && max_time != 0 && millis() > max_time) {
+    if (clicks == 1 && max_time != 0 && (millis() > max_time || millis() - min_time > 250)) {
         Serial.println("Button Pressed Once");
         press_time = 0;
         max_time = 0;
         clicks = 0;
-
-        is_on = !is_on;
-        //Double Press Action
-        /*
-        if (LED1Status == LOW) {
-        digitalWrite(LED1, HIGH);
-        LED1Status = HIGH;
-        }
-
-        else if (LED1Status == HIGH) {
-        digitalWrite(LED1, LOW);
-        LED1Status = LOW;
-        }
-        */
   }
+}
 
 
 ////////////////////////////////////////////////////////////////////
