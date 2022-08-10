@@ -19,11 +19,10 @@ unsigned long time_curr = 0;
 unsigned long time_prev = 0;
 const int FLAP_DELAY    = 110;
 const int DROP_DELAY    = 200;
-const int SWITCH_DELAY  = 500;
+const int SWITCH_DELAY   = 500;
 
 // analog readings
-unsigned long z_vals[2][2] = {{0,0}, 
-                              {0,0}};
+unsigned long z_times[2] = {0,0};
 int x_val = 0;
 int y_val = 0;
 int z_val = 0;
@@ -77,50 +76,23 @@ void loop() {
         y_val = (int)ctrl_data.y_tc;
         z_val = (int)ctrl_data.z_tc;
 
-        Serial.println(x_val);
-        Serial.println(y_val);
-        Serial.println(z_val);
+        //Serial.println(x_val);
+        //Serial.println(y_val);
+        //Serial.println(z_val);
         
-        // checks if butterfly is switched on
-        if (z_val == 1) {
-            for (byte c = 0; c <= 1; ++c) {
-                if (z_vals[0][c] == 0) {
-                    z_vals[0][c] = z_val;
-                }
-                if (z_vals[1][c] == 0) {
-                    z_vals[1][c] = time_curr;    
-                }
-                if (abs(z_vals[1][0] - z_vals[1][1]) <= 5) { // 5 ms minimum delay
-                    z_vals[0][1] = 0;
-                    z_vals[1][1] = 0;
-                }
-            }
-        
-            if (is_dbl_pressed(10, SWITCH_DELAY)) {
-                is_on = !is_on;
-                for (byte r = 0; r <= 1; ++r) {
-                    for (byte c = 0; c <= 1; ++c) {
-                        z_vals[r][c] = 0;
-                    }
-                }
-            }
-            else if (abs(z_vals[1][0] - z_vals[1][1]) > SWITCH_DELAY) {
-                for (byte r = 0; r <= 1; ++r) {
-                    for (byte c = 0; c <= 1; ++c) {
-                        z_vals[r][c] = 0;
-                    }
-                }
-            }
-        }
+        // checks if butterfly is switched on with thres [10,500] ms
+        swt_signal(z_val, 20, 5000); 
     
         Serial.print("This butterfly is on (T/F): ");
-        Serial.println(is_on);
+        if (is_on) { Serial.println("TRUE"); }
+        else {  Serial.println("FALSE"); }
+        //Serial.println("--z times--");
+        //Serial.println(z_times[0]);
+        //Serial.println(z_times[1]);
+        //Serial.println("");
     }
 
-    while (is_on) {
-
-        // x_val = analogRead(X); // joystick X
-        // y_val = analogRead(Y); // joystick Y
+    if (is_on) {
 
         int x_uint8 = map(x_val, 0, 1023, 0, 255); // maps 0-1023 to 0-255
         int y_uint8 = map(y_val, 0, 1023, 0, 255);
@@ -174,21 +146,6 @@ int get_angle (int displacement) {
     return 90 + displacement;
 }
 
-bool is_dbl_pressed (int min_thres, int max_thres) {
-    
-    for (byte c = 0; c < sizeof(z_vals[0]); ++c) {
-        if (z_vals[0][c] == 0) {
-            return false;
-        }
-    }
-    if (abs(z_vals[1][0] - z_vals[1][1]) > max_thres || 
-        abs(z_vals[1][0] - z_vals[1][1]) < min_thres) {
-        return false;
-    }
-
-    return true;
-}
-
 void servo_transmit(Servo MOTOR, int angle, int delay, bool is_delayed) {
     if (is_delayed) {
         if (time_curr - time_prev >= delay) {
@@ -203,13 +160,21 @@ void servo_transmit(Servo MOTOR, int angle, int delay, bool is_delayed) {
 
 void swt_signal(int z, int min_thres, int max_thres) {
     if (z == 0) {
-        return null;
+        return;
     }
     // if z == 1 :
     for (byte c = 0; c <= 1; ++c) {
-        if (z_times[c] == 0.0) {
+        if (z_times[c] == 0) {
             z_times[c] = millis();
         }
+    }
+    if (abs(z_times[1] - z_times[0]) < 5) {
+      z_times[1] = 0;
+    }
+        Serial.println(z_times[0]);
+        Serial.println(z_times[1]);
+        Serial.println();
+        
         bool has_zero = false;
         for (byte d = 0; d <= 1; ++d) {
             if (z_times[d] == 0) {
@@ -220,19 +185,17 @@ void swt_signal(int z, int min_thres, int max_thres) {
                               && abs(z_times[1] - z_times[0]) <= max_thres) {
             is_on = !is_on;
             // clear z_times
-            for (byte e = 0; e <= 1; ++e) {
-                z_times[e] = 0;
-            }
+            z_times[0] = 0;
+            z_times[1] = 0;
         }
-        else if (abs(z_times[1] - z_times[0]) > min_thres
-              || abs(z_times[1] - z_times[0]) < max_thres) {
+        else if (abs(z_times[1] - z_times[0]) < min_thres
+              || abs(z_times[1] - z_times[0]) > max_thres) {
             // clear z_times    
-            for (byte e = 0; e <= 1; ++e) {
-                z_times[e] = 0;
-            }
+            z_times[0] = 0;
+            z_times[1] = 0;
         }
     }
-}
+
 
 ////////////////////////////////////////////////////////////////////
 
