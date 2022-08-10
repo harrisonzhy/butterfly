@@ -15,14 +15,14 @@ RF24 Radio(7,8); // CE, CSN
 const byte address[6] = "37412";
 
 // timekeeping
-int time_prev = 0;
-int time_curr = 0;
+unsigned long time_prev  = 0;
+unsigned long time_curr  = 0;
 
 unsigned long press_time = 0;
 unsigned long min_time   = 0;
 unsigned long max_time   = 0;
 int clicks = 0;
-const int FLAP_DELAY   = 110;
+const int FLAP_DELAY   = 9;
 const int DROP_DELAY   = 200;
 const int SWITCH_DELAY = 500;
 
@@ -105,9 +105,11 @@ void loop() {
 
         // stationary or forward
         servo_transmit(LEFT_SERVO, 30, FLAP_DELAY, true);
-        servo_transmit(RIGHT_SERVO, 30, FLAP_DELAY, false);
-        servo_transmit(LEFT_SERVO, -30, FLAP_DELAY, true);
+        servo_transmit(RIGHT_SERVO, 30, FLAP_DELAY, true);
+        servo_transmit(LEFT_SERVO, -30, FLAP_DELAY, false);
         servo_transmit(RIGHT_SERVO, -30, FLAP_DELAY, false);
+        servo_transmit(LEFT_SERVO, 30, FLAP_DELAY, true);
+        servo_transmit(RIGHT_SERVO, 30, FLAP_DELAY, true);
 
         // turn left
         while (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {
@@ -153,9 +155,13 @@ int get_angle (int displacement) {
 }
 
 void servo_transmit(Servo MOTOR, int angle, int delay, bool is_delayed) {
+
+    time_curr = millis();
+    
     if (is_delayed) {
         if (time_curr - time_prev >= delay) {
-        MOTOR.write(get_angle(angle));
+            time_prev = time_curr;
+            MOTOR.write(get_angle(angle));
         }
     }
     else {
@@ -167,11 +173,9 @@ void servo_transmit(Servo MOTOR, int angle, int delay, bool is_delayed) {
 
 void dbl_prs (int z, unsigned long max_thres) {
     unsigned long min_thres = 250;
-
     if (z == 0) {
         return;
     }
-
     else if (z == 1) {
     
         if (clicks == 0) {
@@ -189,13 +193,12 @@ void dbl_prs (int z, unsigned long max_thres) {
             clicks = 0;      
         }    
     }
-
     if (clicks == 1 && max_time != 0 && (millis() > max_time || millis() - min_time > min_thres)) {
         Serial.println("pressed once.");
         press_time = 0;
         max_time = 0;
         clicks = 0;
-  }
+    }
 }
 
 
