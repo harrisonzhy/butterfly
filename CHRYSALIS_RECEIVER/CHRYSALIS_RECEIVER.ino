@@ -175,26 +175,26 @@ void swt_signal(int z, int min_thres, int max_thres) {
         Serial.println(z_times[1]);
         Serial.println();
         
-    bool has_zero = false;
-    for (byte d = 0; d <= 1; ++d) {
-        if (z_times[d] == 0) {
-            has_zero = true;
+        bool has_zero = false;
+        for (byte d = 0; d <= 1; ++d) {
+            if (z_times[d] == 0) {
+                has_zero = true;
+            }
+        }
+        if (has_zero == false && abs(z_times[1] - z_times[0]) >= min_thres 
+                              && abs(z_times[1] - z_times[0]) <= max_thres) {
+            is_on = !is_on;
+            // clear z_times
+            z_times[0] = 0;
+            z_times[1] = 0;
+        }
+        else if (abs(z_times[1] - z_times[0]) <= min_thres
+              || abs(z_times[1] - z_times[0]) >= max_thres) {
+            // clear z_times    
+            z_times[0] = 0;
+            z_times[1] = 0;
         }
     }
-    if (has_zero == false && abs(z_times[1] - z_times[0]) >= min_thres 
-                            && abs(z_times[1] - z_times[0]) <= max_thres) {
-        is_on = !is_on;
-        // clear z_times
-        z_times[0] = 0;
-        z_times[1] = 0;
-    }
-    else if (abs(z_times[1] - z_times[0]) < min_thres
-            || abs(z_times[1] - z_times[0]) > max_thres) {
-        // clear z_times    
-        z_times[0] = 0;
-        z_times[1] = 0;
-    }
-}
 
 
 ////////////////////////////////////////////////////////////////////
