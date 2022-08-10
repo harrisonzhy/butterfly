@@ -96,23 +96,23 @@ void loop() {
                 }
             }
         
-        if (is_dbl_pressed(10, SWITCH_DELAY)) {
-            is_on = !is_on;
-            for (byte r = 0; r <= 1; ++r) {
-                for (byte c = 0; c <= 1; ++c) {
-                    z_vals[r][c] = 0;
+            if (is_dbl_pressed(10, SWITCH_DELAY)) {
+                is_on = !is_on;
+                for (byte r = 0; r <= 1; ++r) {
+                    for (byte c = 0; c <= 1; ++c) {
+                        z_vals[r][c] = 0;
+                    }
+                }
+            }
+            else if (abs(z_vals[1][0] - z_vals[1][1]) > SWITCH_DELAY) {
+                for (byte r = 0; r <= 1; ++r) {
+                    for (byte c = 0; c <= 1; ++c) {
+                        z_vals[r][c] = 0;
+                    }
                 }
             }
         }
-        else if (abs(z_vals[1][0] - z_vals[1][1]) > SWITCH_DELAY) {
-            for (byte r = 0; r <= 1; ++r) {
-                for (byte c = 0; c <= 1; ++c) {
-                    z_vals[r][c] = 0;
-                }
-            }
-        }
-        
-    }
+    
         Serial.print("This butterfly is on (T/F): ");
         Serial.println(is_on);
     }
@@ -199,6 +199,39 @@ void servo_transmit(Servo MOTOR, int angle, int delay, bool is_delayed) {
         MOTOR.write(get_angle(angle));
     }
     time_prev = time_curr;
+}
+
+void swt_signal(int z, int min_thres, int max_thres) {
+    if (z == 0) {
+        return null;
+    }
+    // if z == 1 :
+    for (byte c = 0; c <= 1; ++c) {
+        if (z_times[c] == 0.0) {
+            z_times[c] = millis();
+        }
+        bool has_zero = false;
+        for (byte d = 0; d <= 1; ++d) {
+            if (z_times[d] == 0) {
+                has_zero = true;
+            }
+        }
+        if (has_zero == false && abs(z_times[1] - z_times[0]) >= min_thres 
+                              && abs(z_times[1] - z_times[0]) <= max_thres) {
+            is_on = !is_on;
+            // clear z_times
+            for (byte e = 0; e <= 1; ++e) {
+                z_times[e] = 0;
+            }
+        }
+        else if (abs(z_times[1] - z_times[0]) > min_thres
+              || abs(z_times[1] - z_times[0]) < max_thres) {
+            // clear z_times    
+            for (byte e = 0; e <= 1; ++e) {
+                z_times[e] = 0;
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
