@@ -138,7 +138,7 @@ void loop() {
                 servo_transmit(RIGHT_SERVO, -30, DROP_DELAY, false);
             }
         }
-    } /* while (is_on) {} */
+    } /* if (is_on) {} */
 }
 
 int get_angle (int displacement) {
@@ -164,6 +164,46 @@ void servo_transmit(Servo MOTOR, int angle, int delay, bool is_delayed) {
     time_prev = time_curr;
 }
 
+
+void dbl_prs (int z, unsigned long max_thres) {
+    unsigned long min_thres = 250;
+
+    if (z == 0) {
+        return;
+    }
+
+    else if (z == 1) {
+    
+        if (clicks == 0) {
+            press_time = millis();
+            min_time = press_time - 10;
+            max_time = press_time + max_thres;
+            clicks = 1;
+        }
+
+        else if (clicks == 1 && millis() < max_time && millis() - min_time > min_thres) {
+            Serial.println("pressed twice.");
+            is_on = !is_on;
+            press_time = 0;
+            max_time = 0;
+            clicks = 0;      
+        }    
+    }
+
+    if (clicks == 1 && max_time != 0 && (millis() > max_time || millis() - min_time > min_thres)) {
+        Serial.println("pressed once.");
+        press_time = 0;
+        max_time = 0;
+        clicks = 0;
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////
+
+/* CURRENTLY UNUSED */
+
+/*
 void swt_signal(int z, int min_thres, int max_thres) {
     min_thres = 200;
     max_thres = 4000;
@@ -207,44 +247,6 @@ void swt_signal(int z, int min_thres, int max_thres) {
         }
 }
 
-void dbl_prs (int z, unsigned long max_thres) {
-
-    if (z == 0) {
-        return;
-    }
-
-    else if (z == 1) {
-    
-        if (clicks == 0) {
-            press_time = millis();
-            min_time = press_time - 10;
-            max_time = press_time + max_thres;
-            clicks = 1;
-        }
-
-        else if (clicks == 1 && millis() < max_time && millis() - min_time > 250) {
-            is_on = !is_on;
-       
-            press_time = 0;
-            max_time = 0;
-            clicks = 0;      
-        }    
-    }
-
-    if (clicks == 1 && max_time != 0 && (millis() > max_time || millis() - min_time > 250)) {
-        Serial.println("Button Pressed Once");
-        press_time = 0;
-        max_time = 0;
-        clicks = 0;
-  }
-}
-
-
-////////////////////////////////////////////////////////////////////
-
-/* CURRENTLY UNUSED */
-
-/*
 int get_uint8 (float degrees) {
     if (degrees > 90.0) {degrees = 90.0;}
     else if (degrees < -90.0) {degrees = -90.0;}
