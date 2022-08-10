@@ -15,14 +15,15 @@ RF24 Radio(7,8); // CE, CSN
 const byte address[6] = "37412";
 
 // timekeeping
-unsigned long time_curr = 0;
-unsigned long time_prev = 0;
-const int FLAP_DELAY    = 110;
-const int DROP_DELAY    = 200;
-const int SWITCH_DELAY   = 500;
+unsigned long press_time = 0;
+unsigned long max_time   = 0;
+int clicks = 0;
+const int FLAP_DELAY   = 110;
+const int DROP_DELAY   = 200;
+const int SWITCH_DELAY = 500;
 
 // analog readings
-unsigned long z_times[2] = {0,0};
+long z_times[2] = {0,0};
 int x_val = 0;
 int y_val = 0;
 int z_val = 0;
@@ -80,9 +81,10 @@ void loop() {
         //Serial.println(y_val);
         //Serial.println(z_val);
         
-        // checks if butterfly is switched on with thres [20,500] ms
-        swt_signal(z_val, 20, 5000); 
-    
+        // checks if butterfly is switched on with thres [10,500] ms
+        //swt_signal(z_val, 20, 5000); 
+        dbl_prs(z_val, 1000);
+
         Serial.print("This butterfly is on (T/F): ");
         if (is_on) { Serial.println("TRUE"); }
         else {  Serial.println("FALSE"); }
@@ -159,21 +161,25 @@ void servo_transmit(Servo MOTOR, int angle, int delay, bool is_delayed) {
 }
 
 void swt_signal(int z, int min_thres, int max_thres) {
+    min_thres = 200;
+    max_thres = 4000;
+
     if (z == 0) {
         return;
     }
     // if z == 1 :
-    for (byte c = 0; c <= 1; ++c) {
-        if (z_times[c] == 0) {
-            z_times[c] = millis();
-        }
+    if (z_times[0] == 0) {
+      z_times[0] = millis();
     }
-    if (abs(z_times[1] - z_times[0]) < 5) {
-      z_times[1] = 0;
+    else if (z_times[1] == 0) {
+      z_times[1] = millis();
     }
-        Serial.println(z_times[0]);
-        Serial.println(z_times[1]);
-        Serial.println();
+
+       // if (z_times[0] != 0 && z_times[1] != 0) {
+            Serial.println(z_times[0]);
+            Serial.println(z_times[1]);
+            Serial.println();
+        //}
         
         bool has_zero = false;
         for (byte d = 0; d <= 1; ++d) {
@@ -184,17 +190,76 @@ void swt_signal(int z, int min_thres, int max_thres) {
         if (has_zero == false && abs(z_times[1] - z_times[0]) >= min_thres 
                               && abs(z_times[1] - z_times[0]) <= max_thres) {
             is_on = !is_on;
-            // clear z_times
+            // clear z_times[2]
             z_times[0] = 0;
             z_times[1] = 0;
         }
-        else if (abs(z_times[1] - z_times[0]) <= min_thres
-              || abs(z_times[1] - z_times[0]) >= max_thres) {
-            // clear z_times    
+         if (abs(z_times[1] - z_times[0]) <= min_thres ||
+               abs(z_times[1] - z_times[0]) >= max_thres) {
+                Serial.println(abs(z_times[1] - z_times[0]));
+          //   clear z_times[2]    
             z_times[0] = 0;
-            z_times[1] = 0;
+            //z_times[1] = 0;
         }
+}
+
+void dbl_prs (int z, unsigned long max_thres)
+
+    if (z == 0) {
+        return;
     }
+
+    else if (z == 1) {
+    
+        if (clicks == 0) {
+            press_time = millis();
+            max_time = press_time + max_thres;    
+            clicks = 1;
+        }
+
+        else if (clicks == 1 && millis() < max_time) {
+            Serial.println("Button Pressed twice");
+            is_on = !is_on;
+        
+            /*
+            if (LED2Status == LOW){
+                digitalWrite(LED2, HIGH);
+                LED2Status = HIGH;
+            }
+
+            else if (LED2Status == HIGH){
+                digitalWrite(LED2, LOW);
+                LED2Status = LOW;
+            }
+            */ 
+
+            //set variables back to 0
+            press_time = 0;
+            max_time = 0;
+            clicks = 0;      
+        }    
+    }
+
+    if (clicks == 1 && max_time != 0 && millis() > max_time) {
+        Serial.println("Button Pressed Once");
+        press_time = 0;
+        max_time = 0;
+        clicks = 0;
+
+        is_on = !is_on;
+        //Double Press Action
+        /*
+        if (LED1Status == LOW) {
+        digitalWrite(LED1, HIGH);
+        LED1Status = HIGH;
+        }
+
+        else if (LED1Status == HIGH) {
+        digitalWrite(LED1, LOW);
+        LED1Status = LOW;
+        }
+        */
+  }
 
 
 ////////////////////////////////////////////////////////////////////
