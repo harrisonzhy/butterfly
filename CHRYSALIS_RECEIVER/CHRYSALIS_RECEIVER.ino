@@ -22,8 +22,8 @@ unsigned long press_time = 0;
 unsigned long min_time   = 0;
 unsigned long max_time   = 0;
 int clicks = 0;
-const int FLAP_DELAY   = 9;
-const int DROP_DELAY   = 200;
+const int FLAP_DELAY   = 90;
+const int DROP_DELAY   = 160;
 const int SWITCH_DELAY = 500;
 
 // analog readings
@@ -87,15 +87,14 @@ void loop() {
         
         // checks if butterfly is switched on with thres [10,500] ms
         //swt_signal(z_val, 20, 5000); 
-        dbl_prs(z_val, 1000);
-
-        Serial.print("This butterfly is on (T/F): ");
-        if (is_on) { Serial.println("TRUE"); }
-        else {  Serial.println("FALSE"); }
-        //Serial.println("--z times--");
-        //Serial.println(z_times[0]);
-        //Serial.println(z_times[1]);
-        //Serial.println("");
+        swt_signal(z_val, 250, 1000);
+        Serial.print("Butterfly is on (T/F): ");
+        if (is_on) {
+            Serial.println("TRUE");
+        }
+        else {
+            Serial.println("FALSE"); 
+        }
     }
 
     if (is_on) {
@@ -104,41 +103,39 @@ void loop() {
         int y_uint8 = map(y_val, 0, 1023, 0, 255);
 
         // stationary or forward
-        servo_transmit(LEFT_SERVO, 30, FLAP_DELAY, true);
-        servo_transmit(RIGHT_SERVO, 30, FLAP_DELAY, true);
-        servo_transmit(LEFT_SERVO, -30, FLAP_DELAY, false);
-        servo_transmit(RIGHT_SERVO, -30, FLAP_DELAY, false);
-        servo_transmit(LEFT_SERVO, 30, FLAP_DELAY, true);
-        servo_transmit(RIGHT_SERVO, 30, FLAP_DELAY, true);
+        servo_transmit(LEFT_SERVO, 30, FLAP_DELAY);
+        servo_transmit(RIGHT_SERVO, 30, FLAP_DELAY);
+        servo_transmit(LEFT_SERVO, -30, FLAP_DELAY);
+        servo_transmit(RIGHT_SERVO, -30, FLAP_DELAY);
 
         // turn left
-        while (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {
-            for (byte i = 0; i < 3; i++) {
-                servo_transmit(LEFT_SERVO, 20, FLAP_DELAY, true);
-                servo_transmit(RIGHT_SERVO, 40, FLAP_DELAY, false);
-                servo_transmit(LEFT_SERVO, -40, FLAP_DELAY, true);
-                servo_transmit(RIGHT_SERVO, -20, FLAP_DELAY, false);                
-            }
+        if (x_val < LEFT_THRES_ANLG && y_val > UP_THRES_ANLG) {
+            //for (byte i = 0; i < 3; i++) {
+                servo_transmit(LEFT_SERVO, 10, FLAP_DELAY);
+                servo_transmit(RIGHT_SERVO, 50, FLAP_DELAY);
+                servo_transmit(LEFT_SERVO, -50, FLAP_DELAY);
+                servo_transmit(RIGHT_SERVO, -10, FLAP_DELAY);                
+            //}
         }
 
         // turn right
-        while (x_val > RIGHT_THRES_ANLG && y_val > UP_THRES_ANLG) {
-            for (byte i = 0; i < 3; i++) {
-                servo_transmit(LEFT_SERVO, 40, FLAP_DELAY, true);
-                servo_transmit(RIGHT_SERVO, 20, FLAP_DELAY, false);
-                servo_transmit(LEFT_SERVO, -20, FLAP_DELAY, true);
-                servo_transmit(RIGHT_SERVO, -40, FLAP_DELAY, false);                
-            }
+        else if (x_val > RIGHT_THRES_ANLG && y_val > UP_THRES_ANLG) {
+            //for (byte i = 0; i < 3; i++) {
+                servo_transmit(LEFT_SERVO, 50, FLAP_DELAY);
+                servo_transmit(RIGHT_SERVO, 10, FLAP_DELAY);
+                servo_transmit(LEFT_SERVO, -10, FLAP_DELAY);
+                servo_transmit(RIGHT_SERVO, -50, FLAP_DELAY);                
+            //}
         }   
 
         // drop altitude
-        while (y_val < DOWN_THRES_ANLG) {
-            for (byte i = 0; i < 3; i++) {
-                servo_transmit(LEFT_SERVO, 30, DROP_DELAY, true);
-                servo_transmit(RIGHT_SERVO, 30, DROP_DELAY, false);
-                servo_transmit(LEFT_SERVO, -30, DROP_DELAY, true);
-                servo_transmit(RIGHT_SERVO, -30, DROP_DELAY, false);
-            }
+        else if (y_val < DOWN_THRES_ANLG) {
+            //for (byte i = 0; i < 3; i++) {
+                servo_transmit(LEFT_SERVO, 30, DROP_DELAY);
+                servo_transmit(RIGHT_SERVO, 30, DROP_DELAY);
+                servo_transmit(LEFT_SERVO, -30, DROP_DELAY);
+                servo_transmit(RIGHT_SERVO, -30, DROP_DELAY);
+            //}
         }
     } /* if (is_on) {} */
 }
@@ -154,25 +151,13 @@ int get_angle (int displacement) {
     return 90 + displacement;
 }
 
-void servo_transmit(Servo MOTOR, int angle, int delay, bool is_delayed) {
-
-    time_curr = millis();
-    
-    if (is_delayed) {
-        if (time_curr - time_prev >= delay) {
-            time_prev = time_curr;
-            MOTOR.write(get_angle(angle));
-        }
-    }
-    else {
-        MOTOR.write(get_angle(angle));
-    }
-    time_prev = time_curr;
+void servo_transmit(Servo MOTOR, int angle, int time_delay) {
+    MOTOR.write(get_angle(angle));
+    delay(time_delay);
 }
 
 
-void dbl_prs (int z, unsigned long max_thres) {
-    unsigned long min_thres = 250;
+void swt_signal (int z, unsigned long min_thres, unsigned long max_thres) {
     if (z == 0) {
         return;
     }
@@ -207,7 +192,7 @@ void dbl_prs (int z, unsigned long max_thres) {
 /* CURRENTLY UNUSED */
 
 /*
-void swt_signal(int z, int min_thres, int max_thres) {
+void dbl_press(int z, int min_thres, int max_thres) {
     min_thres = 200;
     max_thres = 4000;
 
