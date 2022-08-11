@@ -9,10 +9,10 @@
 
 #define X A0
 #define Y A1
-int Z = 9;
+int Z = 2;
 
-RF24 Radio(7,8); // CE, CSN
-const byte address[6] = "37412";
+RF24 Radio(3,4); // CE, CSN
+const byte address[6] = "19211";
 
 ////////////////////////////////////////////////////////////////////
 
