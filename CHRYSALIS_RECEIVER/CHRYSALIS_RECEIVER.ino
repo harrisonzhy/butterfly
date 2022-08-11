@@ -53,8 +53,8 @@ Control ctrl_data;
 
 void setup() {
 
-    Serial.begin(9600);
     delay(5000);
+    Serial.begin(9600);
     
     LEFT_SERVO.attach(2);
     RIGHT_SERVO.attach(3);
