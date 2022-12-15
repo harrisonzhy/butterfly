@@ -1,2 +1,2 @@
-# chrysalis
+# Chrysalis
 Remote-controlled biomimetic butterfly.
